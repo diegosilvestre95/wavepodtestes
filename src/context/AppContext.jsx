@@ -11,6 +11,7 @@ export function AppProvider({ children }) {
   const [estoqueMap, setEstoqueMap]   = useState({})
   const [catalogo, setCatalogo]       = useState(CATALOGO_BASE)
   const [configData, setConfigData]   = useState({})
+  const [loading, setLoading]         = useState(true)
 
   // ── Carrinho ─────────────────────────────────────────────────────────────
   const [cart, setCart] = useState([])
@@ -99,6 +100,7 @@ export function AppProvider({ children }) {
     const init = async () => {
       const cfg = await carregarPrecosSalvos(CATALOGO_BASE)
       await carregarProdutos(cfg)
+      setLoading(false)
     }
     init()
   }, []) // eslint-disable-line
@@ -174,7 +176,7 @@ export function AppProvider({ children }) {
   return (
     <AppContext.Provider value={{
       // dados
-      produtosDB, estoqueMap, catalogo, configData,
+      produtosDB, estoqueMap, catalogo, configData, loading,
       // funções de dados
       carregarProdutos, carregarPrecosSalvos,
       // catálogo setter (para compras que adicionam novos modelos)

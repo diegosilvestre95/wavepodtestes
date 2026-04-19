@@ -190,7 +190,7 @@ function WaFloat() {
 
 // ─── Vitrine (página principal) ───────────────────────────────────────────────
 export default function Vitrine() {
-  const { catalogo, produtosDB, estoqueMap, cart, addToCart } = useApp()
+  const { catalogo, produtosDB, estoqueMap, cart, addToCart, loading } = useApp()
   const navigate = useNavigate()
 
   const sidebarCats = useMemo(() =>
@@ -254,20 +254,23 @@ export default function Vitrine() {
           </div>
 
           <div className="catalog-wrap">
-            {produtosDB.length === 0 && (
+            {loading ? (
               <div className="empty"><span>⏳</span>Carregando produtos...</div>
+            ) : produtosDB.length === 0 ? (
+              <div className="empty"><span>⚠️</span>Nenhum produto encontrado. Verifique a conexão com o banco de dados.</div>
+            ) : (
+              catalogo.map(cat => (
+                <div key={cat.linha} id={`pc-${cat.linha}`}>
+                  <PodCard
+                    cat={cat}
+                    produtosDB={produtosDB}
+                    estoqueMap={estoqueMap}
+                    cart={cart}
+                    onAddToCart={addToCart}
+                  />
+                </div>
+              ))
             )}
-            {catalogo.map(cat => (
-              <div key={cat.linha} id={`pc-${cat.linha}`}>
-                <PodCard
-                  cat={cat}
-                  produtosDB={produtosDB}
-                  estoqueMap={estoqueMap}
-                  cart={cart}
-                  onAddToCart={addToCart}
-                />
-              </div>
-            ))}
           </div>
         </main>
       </div>
