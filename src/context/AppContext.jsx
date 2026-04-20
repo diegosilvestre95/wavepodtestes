@@ -6,52 +6,38 @@ import { eKey } from '../lib/utils'
 const AppContext = createContext(null)
 
 export function AppProvider({ children }) {
-  // ── Produtos & catálogo ──────────────────────────────────────────────────
   const [produtosDB, setProdutosDB] = useState([])
   const [estoqueMap, setEstoqueMap] = useState({})
   const [catalogo, setCatalogo]     = useState(CATALOGO_BASE)
   const [configData, setConfigData] = useState({})
   const [loading, setLoading]       = useState(true)
-
-  // ── Refs estáveis para evitar loops de dependência ────────────────────────
-  // configData como ref → carregarProdutos pode lê-la sem entrar nas deps
-  const configDataRef = useRef({})
-  const rtRef         = useRef([])
-
-  // Mantém a ref sincronizada com o state
-  useEffect(() => {
-    configDataRef.current = configData
-  }, [configData])
-
-  // ── Carrinho ──────────────────────────────────────────────────────────────
-  const [cart, setCart] = useState([])
-
-  // ── Auth ──────────────────────────────────────────────────────────────────
+  const [cart, setCart]             = useState([])
   const [currentUser, setCurrentUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('wvpod_user')) } catch { return null }
   })
-
-  // ── Toast ─────────────────────────────────────────────────────────────────
   const [toasts, setToasts] = useState([])
+
+  // Refs estáveis — evitam loops de dependência e dupla inicialização
+  const configRef   = useRef({})
+  const rtRef       = useRef([])
+  const initDoneRef = useRef(false)
+
+  useEffect(() => { configRef.current = configData }, [configData])
+
   const toast = useCallback((msg, icon = '✓') => {
     const id = Date.now()
     setToasts(prev => [...prev, { id, msg, icon }])
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3200)
   }, [])
 
-  // ── carregarPrecosSalvos ──────────────────────────────────────────────────
-  // Retorna o cfg para quem chama poder passar adiante — evita race condition
+  // Dep array vazio em ambas as funções → estáveis → sem loop
   const carregarPrecosSalvos = useCallback(async (catalogoBase) => {
     try {
       const { data } = await sb.from('config').select('*')
       const cfg = {}
       ;(data || []).forEach(row => { cfg[row.chave] = row.valor })
-
-      // Atualiza ref imediatamente (antes do próximo render)
-      configDataRef.current = cfg
+      configRef.current = cfg
       setConfigData(cfg)
-
-      // Aplica preços e descs no catálogo base
       setCatalogo(
         (catalogoBase || CATALOGO_BASE).map(cat => ({
           ...cat,
@@ -64,11 +50,8 @@ export function AppProvider({ children }) {
       console.error('config:', e)
       return {}
     }
-  }, []) // ← sem dependências → função nunca recriada
+  }, [])
 
-  // ── carregarProdutos ──────────────────────────────────────────────────────
-  // Usa configDataRef.current em vez de configData no closure
-  // → dep array fica vazio → useCallback é estável → sem loop
   const carregarProdutos = useCallback(async (cfgOverride) => {
     const { data, error } = await sb.from('produtos').select('*').order('nome')
     if (error) { console.error('produtos:', error); return }
@@ -76,7 +59,6 @@ export function AppProvider({ children }) {
     const prods = data || []
     setProdutosDB(prods)
 
-    // Mapa de estoque por nome+sabor
     const mapa = {}
     prods.forEach(p => {
       const k = eKey(p.nome, p.sabor || '')
@@ -84,13 +66,11 @@ export function AppProvider({ children }) {
     })
     setEstoqueMap(mapa)
 
-    // Usa cfgOverride (passado na init) ou a ref atual (chamadas do realtime)
-    const cfg = cfgOverride ?? configDataRef.current
+    const cfg = cfgOverride ?? configRef.current
 
     setCatalogo(prev => {
       const nomesVistos = new Set(prev.map(c => c.nome))
       const extras = []
-
       ;[...new Set(prods.map(p => p.nome))].forEach(nome => {
         if (!nomesVistos.has(nome)) {
           const linha = nome.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
@@ -102,8 +82,6 @@ export function AppProvider({ children }) {
           nomesVistos.add(nome)
         }
       })
-
-      // Atualiza preços/descs dos modelos já existentes + adiciona novos
       return [
         ...prev.map(cat => ({
           ...cat,
@@ -113,51 +91,47 @@ export function AppProvider({ children }) {
         ...extras,
       ]
     })
-  }, []) // ← sem dependências → função nunca recriada → sem loop
-
-  // ── Inicialização (roda uma única vez) ────────────────────────────────────
-  useEffect(() => {
-    let cancelled = false
-    const init = async () => {
-      const cfg = await carregarPrecosSalvos(CATALOGO_BASE)
-      if (!cancelled) {
-        await carregarProdutos(cfg)
-        setLoading(false)
-      }
-    }
-    init()
-    return () => { cancelled = true }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Realtime ──────────────────────────────────────────────────────────────
-  const iniciarRealtime = useCallback(() => {
-    // Evita inscrições duplicadas
-    if (rtRef.current.length > 0) return
-
-    const chProd = sb.channel('rt-produtos')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
-        carregarProdutos() // usa configDataRef internamente → sempre atual
-      })
-      .subscribe()
-
-    const chPed = sb.channel('rt-pedidos')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, (ev) => {
-        window.dispatchEvent(new CustomEvent('wvpod:novopedido', { detail: ev.new }))
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, () => {
-        window.dispatchEvent(new CustomEvent('wvpod:pedidoatualizado'))
-      })
-      .subscribe()
-
-    rtRef.current = [chProd, chPed]
-  }, [carregarProdutos]) // carregarProdutos é estável → iniciarRealtime também é
+  }, [])
 
   const pararRealtime = useCallback(() => {
     rtRef.current.forEach(ch => sb.removeChannel(ch))
     rtRef.current = []
   }, [])
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
+  const iniciarRealtime = useCallback(() => {
+    if (rtRef.current.length > 0) return  // guard: nunca inscreve duas vezes
+    const chProd = sb.channel('rt-produtos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
+        carregarProdutos()
+      }).subscribe()
+    const chPed = sb.channel('rt-pedidos')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, (ev) => {
+        window.dispatchEvent(new CustomEvent('wvpod:novopedido', { detail: ev.new }))
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, () => {
+        window.dispatchEvent(new CustomEvent('wvpod:pedidoatualizado'))
+      }).subscribe()
+    rtRef.current = [chProd, chPed]
+  }, [carregarProdutos])
+
+  // Init: initDoneRef garante execução única mesmo no StrictMode
+  useEffect(() => {
+    if (initDoneRef.current) return
+    initDoneRef.current = true
+    const run = async () => {
+      const cfg = await carregarPrecosSalvos(CATALOGO_BASE)
+      await carregarProdutos(cfg)
+      setLoading(false)
+    }
+    run()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Realtime para admin logado
+  useEffect(() => {
+    if (currentUser) iniciarRealtime()
+    return pararRealtime
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const login = useCallback((username, senha) => {
     const user = USERS[username]
     if (user && user.senha === senha) {
@@ -176,13 +150,6 @@ export function AppProvider({ children }) {
     pararRealtime()
   }, [pararRealtime])
 
-  // Liga realtime se já estava logado ao recarregar a página
-  useEffect(() => {
-    if (currentUser) iniciarRealtime()
-    return pararRealtime
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Carrinho helpers ──────────────────────────────────────────────────────
   const addToCart = useCallback((linha, sabor, qty, nome, preco) => {
     setCart(prev => {
       const idx = prev.findIndex(i => i.linha === linha && i.sabor === sabor)

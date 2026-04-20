@@ -1,14 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { eKey } from '../lib/utils'
 import { WA_DIEGO, WA_LUCAS } from '../lib/config'
 import Header from '../components/Header'
 
-// ─── PodCard ─────────────────────────────────────────────────────────────────
-// Memo evita re-render quando outros cards mudam
-import { memo } from 'react'
-
+// memo: evita re-render do card quando outros cards ou o carrinho mudam
 const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAddToCart }) {
   const [selecionados, setSelecionados] = useState({})
 
@@ -19,7 +16,6 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
   const toggleSabor = (sabor, prodId) => {
     const k = eKey(cat.nome, sabor)
     if ((estoqueMap[k] || 0) === 0) return
-
     setSelecionados(prev => {
       if (prev[sabor]) {
         const next = { ...prev }
@@ -59,7 +55,6 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
 
   return (
     <div className="pod-card">
-      {/* Visual hero */}
       <div className="pod-visual">
         <div className="pod-emoji-big">{cat.emoji}</div>
         <div className={`pod-tag${!temEstoque ? ' esgotado-tag' : ''}`}>
@@ -68,7 +63,6 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
         <div className="pod-puffs-badge">{cat.desc}</div>
       </div>
 
-      {/* Corpo */}
       <div className="pod-card-body">
         <div className="pod-header-row">
           <div>
@@ -82,7 +76,6 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
           </div>
         </div>
 
-        {/* Chips de sabor */}
         <div>
           <span className="flavor-label">🍃 Escolha o sabor</span>
           <div className="flavor-chips">
@@ -107,7 +100,6 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
           </div>
         </div>
 
-        {/* Label de seleção */}
         <div className="sabor-sel-label" style={{ color: countSel > 0 ? 'var(--text)' : 'var(--muted)' }}>
           {countSel === 0 && '← Toque em um sabor para selecionar'}
           {countSel === 1 && (
@@ -123,22 +115,13 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
           )}
         </div>
 
-        {/* Ações */}
         <div className="pod-action">
-          <div
-            className="qty-wrap"
-            style={{ display: countSel === 1 ? 'flex' : 'none' }}
-          >
+          <div className="qty-wrap" style={{ display: countSel === 1 ? 'flex' : 'none' }}>
             <button className="qty-btn" disabled={countSel !== 1} onClick={() => changeQty(-1)}>−</button>
             <div className="qty-num">{qtySel}</div>
             <button className="qty-btn" disabled={countSel !== 1} onClick={() => changeQty(1)}>+</button>
           </div>
-
-          <button
-            className="add-btn"
-            disabled={countSel === 0}
-            onClick={handleAddToCart}
-          >
+          <button className="add-btn" disabled={countSel === 0} onClick={handleAddToCart}>
             {countSel === 0
               ? 'Selecione um sabor'
               : countSel === 1
@@ -151,7 +134,6 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
   )
 })
 
-// ─── CartBar ──────────────────────────────────────────────────────────────────
 function CartBar({ cart, onCheckout }) {
   const total = cart.reduce((a, i) => a + i.preco * i.qty, 0)
   const count = cart.reduce((a, i) => a + i.qty, 0)
@@ -172,7 +154,6 @@ function CartBar({ cart, onCheckout }) {
   )
 }
 
-// ─── WaFloat ──────────────────────────────────────────────────────────────────
 function WaFloat() {
   const [open, setOpen] = useState(false)
   return (
@@ -192,7 +173,6 @@ function WaFloat() {
   )
 }
 
-// ─── Vitrine ──────────────────────────────────────────────────────────────────
 export default function Vitrine() {
   const { catalogo, produtosDB, estoqueMap, cart, addToCart, loading } = useApp()
   const navigate = useNavigate()
@@ -214,7 +194,6 @@ export default function Vitrine() {
       <Header showAdminBtn />
 
       <div className="vitrine-shell">
-        {/* Sidebar desktop */}
         <aside className="vitrine-sidebar">
           <div className="vsidebar-logo">
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.1em' }}>
@@ -244,9 +223,7 @@ export default function Vitrine() {
           </div>
         </aside>
 
-        {/* Conteúdo principal */}
         <main className="vitrine-main">
-          {/* Pills mobile */}
           <div className="vitrine-mobile-cats">
             {sidebarCats.map(cat => (
               <div key={cat.linha} className="vcat-pill" onClick={() => scrollTo(cat.linha)}>
