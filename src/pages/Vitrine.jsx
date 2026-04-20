@@ -6,8 +6,11 @@ import { WA_DIEGO, WA_LUCAS } from '../lib/config'
 import Header from '../components/Header'
 
 // ─── PodCard ─────────────────────────────────────────────────────────────────
-function PodCard({ cat, produtosDB, estoqueMap, cart, onAddToCart }) {
-  const [selecionados, setSelecionados] = useState({}) // { sabor: { id, qty, max } }
+// Memo evita re-render quando outros cards mudam
+import { memo } from 'react'
+
+const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAddToCart }) {
+  const [selecionados, setSelecionados] = useState({})
 
   const itens     = produtosDB.filter(p => p.nome === cat.nome && (p.quantidade || 0) > 0)
   const esgotados = produtosDB.filter(p => p.nome === cat.nome && (p.quantidade || 0) === 0)
@@ -74,7 +77,7 @@ function PodCard({ cat, produtosDB, estoqueMap, cart, onAddToCart }) {
               {itens.length} sabor{itens.length !== 1 ? 'es' : ''} disponíve{itens.length !== 1 ? 'is' : 'l'}
             </div>
           </div>
-          <div className="pod-price" id={`pprice-${cat.linha}`}>
+          <div className="pod-price">
             R$ {cat.preco.toFixed(2).replace('.', ',')}
           </div>
         </div>
@@ -108,21 +111,22 @@ function PodCard({ cat, produtosDB, estoqueMap, cart, onAddToCart }) {
         <div className="sabor-sel-label" style={{ color: countSel > 0 ? 'var(--text)' : 'var(--muted)' }}>
           {countSel === 0 && '← Toque em um sabor para selecionar'}
           {countSel === 1 && (
-            <>✅ {Object.keys(selecionados)[0]} selecionado
+            <>
+              ✅ {Object.keys(selecionados)[0]} selecionado
               {Object.values(selecionados)[0].max <= 5
                 ? ` — Últimas ${Object.values(selecionados)[0].max} un!`
                 : ''}
             </>
           )}
-          {countSel > 1 && <span style={{ color: 'var(--accent3)' }}>✅ {countSel} sabores selecionados</span>}
+          {countSel > 1 && (
+            <span style={{ color: 'var(--accent3)' }}>✅ {countSel} sabores selecionados</span>
+          )}
         </div>
 
         {/* Ações */}
         <div className="pod-action">
-          {/* Qty só aparece com 1 sabor selecionado */}
           <div
             className="qty-wrap"
-            id={`qwrap-${cat.linha}`}
             style={{ display: countSel === 1 ? 'flex' : 'none' }}
           >
             <button className="qty-btn" disabled={countSel !== 1} onClick={() => changeQty(-1)}>−</button>
@@ -138,16 +142,16 @@ function PodCard({ cat, produtosDB, estoqueMap, cart, onAddToCart }) {
             {countSel === 0
               ? 'Selecione um sabor'
               : countSel === 1
-                ? `+ Adicionar`
+                ? '+ Adicionar'
                 : `+ Adicionar ${countSel} sabores`}
           </button>
         </div>
       </div>
     </div>
   )
-}
+})
 
-// ─── CartBar ─────────────────────────────────────────────────────────────────
+// ─── CartBar ──────────────────────────────────────────────────────────────────
 function CartBar({ cart, onCheckout }) {
   const total = cart.reduce((a, i) => a + i.preco * i.qty, 0)
   const count = cart.reduce((a, i) => a + i.qty, 0)
@@ -168,7 +172,7 @@ function CartBar({ cart, onCheckout }) {
   )
 }
 
-// ─── WaFloat ─────────────────────────────────────────────────────────────────
+// ─── WaFloat ──────────────────────────────────────────────────────────────────
 function WaFloat() {
   const [open, setOpen] = useState(false)
   return (
@@ -188,7 +192,7 @@ function WaFloat() {
   )
 }
 
-// ─── Vitrine (página principal) ───────────────────────────────────────────────
+// ─── Vitrine ──────────────────────────────────────────────────────────────────
 export default function Vitrine() {
   const { catalogo, produtosDB, estoqueMap, cart, addToCart, loading } = useApp()
   const navigate = useNavigate()
@@ -219,13 +223,16 @@ export default function Vitrine() {
           </div>
           <div className="vsidebar-cat-title">Pods Descartáveis</div>
           {sidebarCats.map((cat, i) => (
-            <div key={cat.linha} className={`vsidebar-item${i === 0 ? ' active-cat' : ''}`}
-              onClick={() => scrollTo(cat.linha)}>
+            <div
+              key={cat.linha}
+              className={`vsidebar-item${i === 0 ? ' active-cat' : ''}`}
+              onClick={() => scrollTo(cat.linha)}
+            >
               <span>{cat.emoji}</span> {cat.nome}
               {cat.disponiveis > 0 && <span className="vsidebar-badge">{cat.disponiveis}</span>}
             </div>
           ))}
-          <div style={{ marginTop: 'auto', padding: '16px 16px 0', borderTop: '1px solid var(--border)', marginTop: 20 }}>
+          <div style={{ padding: '16px 16px 0', borderTop: '1px solid var(--border)', marginTop: 20 }}>
             <a href={`https://wa.me/${WA_DIEGO}`} target="_blank" rel="noreferrer"
               style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--muted)', fontSize: 12, textDecoration: 'none', padding: '8px 0' }}>
               💬 Falar com Diego

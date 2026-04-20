@@ -7,16 +7,26 @@ const AppContext = createContext(null)
 
 export function AppProvider({ children }) {
   // ── Produtos & catálogo ──────────────────────────────────────────────────
-  const [produtosDB, setProdutosDB]   = useState([])
-  const [estoqueMap, setEstoqueMap]   = useState({})
-  const [catalogo, setCatalogo]       = useState(CATALOGO_BASE)
-  const [configData, setConfigData]   = useState({})
-  const [loading, setLoading]         = useState(true)
+  const [produtosDB, setProdutosDB] = useState([])
+  const [estoqueMap, setEstoqueMap] = useState({})
+  const [catalogo, setCatalogo]     = useState(CATALOGO_BASE)
+  const [configData, setConfigData] = useState({})
+  const [loading, setLoading]       = useState(true)
 
-  // ── Carrinho ─────────────────────────────────────────────────────────────
+  // ── Refs estáveis para evitar loops de dependência ────────────────────────
+  // configData como ref → carregarProdutos pode lê-la sem entrar nas deps
+  const configDataRef = useRef({})
+  const rtRef         = useRef([])
+
+  // Mantém a ref sincronizada com o state
+  useEffect(() => {
+    configDataRef.current = configData
+  }, [configData])
+
+  // ── Carrinho ──────────────────────────────────────────────────────────────
   const [cart, setCart] = useState([])
 
-  // ── Auth ─────────────────────────────────────────────────────────────────
+  // ── Auth ──────────────────────────────────────────────────────────────────
   const [currentUser, setCurrentUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('wvpod_user')) } catch { return null }
   })
@@ -29,29 +39,36 @@ export function AppProvider({ children }) {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3200)
   }, [])
 
-  // ── Realtime channels ref ─────────────────────────────────────────────────
-  const rtRef = useRef([])
-
   // ── carregarPrecosSalvos ──────────────────────────────────────────────────
-  const carregarPrecosSalvos = useCallback(async (catalogoAtual) => {
+  // Retorna o cfg para quem chama poder passar adiante — evita race condition
+  const carregarPrecosSalvos = useCallback(async (catalogoBase) => {
     try {
       const { data } = await sb.from('config').select('*')
       const cfg = {}
       ;(data || []).forEach(row => { cfg[row.chave] = row.valor })
+
+      // Atualiza ref imediatamente (antes do próximo render)
+      configDataRef.current = cfg
       setConfigData(cfg)
-      // Aplica preços e descs no catálogo
-      setCatalogo(prev =>
-        (catalogoAtual || prev).map(cat => ({
+
+      // Aplica preços e descs no catálogo base
+      setCatalogo(
+        (catalogoBase || CATALOGO_BASE).map(cat => ({
           ...cat,
           preco: cfg[cat.linha] != null ? parseFloat(cfg[cat.linha]) : cat.preco,
           desc:  cfg[`desc:${cat.linha}`] || cat.desc,
         }))
       )
       return cfg
-    } catch { return {} }
-  }, [])
+    } catch (e) {
+      console.error('config:', e)
+      return {}
+    }
+  }, []) // ← sem dependências → função nunca recriada
 
-  // ── carregarProdutosDB ────────────────────────────────────────────────────
+  // ── carregarProdutos ──────────────────────────────────────────────────────
+  // Usa configDataRef.current em vez de configData no closure
+  // → dep array fica vazio → useCallback é estável → sem loop
   const carregarProdutos = useCallback(async (cfgOverride) => {
     const { data, error } = await sb.from('produtos').select('*').order('nome')
     if (error) { console.error('produtos:', error); return }
@@ -59,7 +76,7 @@ export function AppProvider({ children }) {
     const prods = data || []
     setProdutosDB(prods)
 
-    // mapa estoque
+    // Mapa de estoque por nome+sabor
     const mapa = {}
     prods.forEach(p => {
       const k = eKey(p.nome, p.sabor || '')
@@ -67,11 +84,13 @@ export function AppProvider({ children }) {
     })
     setEstoqueMap(mapa)
 
-    // sincroniza catálogo com modelos novos do DB
-    const cfg = cfgOverride || configData
+    // Usa cfgOverride (passado na init) ou a ref atual (chamadas do realtime)
+    const cfg = cfgOverride ?? configDataRef.current
+
     setCatalogo(prev => {
       const nomesVistos = new Set(prev.map(c => c.nome))
       const extras = []
+
       ;[...new Set(prods.map(p => p.nome))].forEach(nome => {
         if (!nomesVistos.has(nome)) {
           const linha = nome.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
@@ -83,7 +102,8 @@ export function AppProvider({ children }) {
           nomesVistos.add(nome)
         }
       })
-      // atualiza preços dos existentes
+
+      // Atualiza preços/descs dos modelos já existentes + adiciona novos
       return [
         ...prev.map(cat => ({
           ...cat,
@@ -93,43 +113,51 @@ export function AppProvider({ children }) {
         ...extras,
       ]
     })
-  }, [configData])
+  }, []) // ← sem dependências → função nunca recriada → sem loop
 
-  // ── inicialização ─────────────────────────────────────────────────────────
+  // ── Inicialização (roda uma única vez) ────────────────────────────────────
   useEffect(() => {
+    let cancelled = false
     const init = async () => {
       const cfg = await carregarPrecosSalvos(CATALOGO_BASE)
-      await carregarProdutos(cfg)
-      setLoading(false)
+      if (!cancelled) {
+        await carregarProdutos(cfg)
+        setLoading(false)
+      }
     }
     init()
-  }, []) // eslint-disable-line
+    return () => { cancelled = true }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Realtime (ligado apenas quando admin logado) ───────────────────────────
+  // ── Realtime ──────────────────────────────────────────────────────────────
   const iniciarRealtime = useCallback(() => {
+    // Evita inscrições duplicadas
+    if (rtRef.current.length > 0) return
+
     const chProd = sb.channel('rt-produtos')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, () => {
-        carregarProdutos()
-      }).subscribe()
+        carregarProdutos() // usa configDataRef internamente → sempre atual
+      })
+      .subscribe()
 
     const chPed = sb.channel('rt-pedidos')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, (ev) => {
-        // dispara evento global para o componente de notificação
         window.dispatchEvent(new CustomEvent('wvpod:novopedido', { detail: ev.new }))
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, () => {
         window.dispatchEvent(new CustomEvent('wvpod:pedidoatualizado'))
-      }).subscribe()
+      })
+      .subscribe()
 
     rtRef.current = [chProd, chPed]
-  }, [carregarProdutos])
+  }, [carregarProdutos]) // carregarProdutos é estável → iniciarRealtime também é
 
   const pararRealtime = useCallback(() => {
     rtRef.current.forEach(ch => sb.removeChannel(ch))
     rtRef.current = []
   }, [])
 
-  // ── Auth ─────────────────────────────────────────────────────────────────
+  // ── Auth ──────────────────────────────────────────────────────────────────
   const login = useCallback((username, senha) => {
     const user = USERS[username]
     if (user && user.senha === senha) {
@@ -148,11 +176,11 @@ export function AppProvider({ children }) {
     pararRealtime()
   }, [pararRealtime])
 
-  // liga realtime se já estava logado (reload de página)
+  // Liga realtime se já estava logado ao recarregar a página
   useEffect(() => {
     if (currentUser) iniciarRealtime()
     return pararRealtime
-  }, []) // eslint-disable-line
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Carrinho helpers ──────────────────────────────────────────────────────
   const addToCart = useCallback((linha, sabor, qty, nome, preco) => {
@@ -175,17 +203,11 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      // dados
       produtosDB, estoqueMap, catalogo, configData, loading,
-      // funções de dados
       carregarProdutos, carregarPrecosSalvos,
-      // catálogo setter (para compras que adicionam novos modelos)
       setCatalogo, setConfigData,
-      // carrinho
       cart, addToCart, removeFromCart, clearCart,
-      // auth
       currentUser, login, logout,
-      // toast
       toast, toasts,
     }}>
       {children}
