@@ -50,7 +50,7 @@ export default function Admin() {
 
   return (
     <div className="admin-layout">
-      {/* DESKTOP SIDEBAR */}
+      {/* 🖥️ DESKTOP ONLY: SIDEBAR */}
       <aside className="slim-sidebar desktop-only">
         <div style={{ marginBottom: 40 }}>
            <Logo size={32} showText={false} light />
@@ -74,7 +74,7 @@ export default function Admin() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* 🚀 STAGE (Sincronizado) */}
       <main className="dash-stage">
         <header className="admin-header">
            <div className="search-engine-wrap" style={{ position: 'relative' }}>
@@ -113,7 +113,7 @@ export default function Admin() {
         </div>
       </main>
 
-      {/* MOBILE BOTTOM NAV */}
+      {/* 📱 MOBILE ONLY: BOTTOM NAV */}
       <nav className="bottom-nav mobile-only">
         {MENU_ITEMS.map(item => (
           <div 
@@ -128,14 +128,16 @@ export default function Admin() {
       </nav>
 
       <style>{`
-        .admin-layout { display: flex; min-height: 100vh; background: #09090b; }
-        .desktop-only { display: flex; }
-        .mobile-only { display: none; }
+        .admin-layout { display: flex; min-height: 100vh; background: #09090b; width: 100%; }
+        
+        /* ISOLAMENTO TOTAL DE CONTEXTO */
+        .desktop-only { display: flex !important; }
+        .mobile-only { display: none !important; }
 
         .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
         .search-engine-wrap { 
           background: #121212; border: 1px solid #1e1e22; border-radius: 12px; 
-          padding: 0 16px; display: flex; alignItems: center; gap: 12px; width: 400px; height: 48px;
+          padding: 0 16px; display: flex; align-items: center; gap: 12px; width: 400px; height: 48px;
         }
         .search-engine-wrap input { background: transparent; border: none; color: #fff; font-size: 14px; width: 100%; outline: none; }
         
@@ -150,17 +152,17 @@ export default function Admin() {
           border-top: 1px solid #1e1e22; display: flex; justify-content: space-around;
           align-items: center; padding: 0 10px; z-index: 1000;
         }
-        .bottom-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: #52525b; transition: 0.2s; }
+        .bottom-item { display: flex; flex-direction: column; align-items: center; gap: 6px; color: #52525b; transition: 0.2s; cursor: pointer; }
         .bottom-item svg { width: 20px; height: 20px; }
         .bottom-item span { font-size: 8px; font-weight: 800; text-transform: uppercase; }
         .bottom-item.active { color: var(--wp-yellow); }
 
         @media (max-width: 768px) {
-          .desktop-only { display: none; }
-          .mobile-only { display: flex; }
-          .dash-stage { padding: 20px 15px 100px 15px !important; }
+          .desktop-only { display: none !important; }
+          .mobile-only { display: flex !important; }
+          .dash-stage { padding: 20px 15px 100px 15px !important; margin-left: 0 !important; }
           .search-engine-wrap { width: 100%; }
-          .mobile-hidden { display: none; }
+          .mobile-hidden { display: none !important; }
         }
       `}</style>
     </div>
