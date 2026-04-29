@@ -1,5 +1,5 @@
 import { useApp } from '../context/AppContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 export default function Header({ showAdminBtn = false, showLogout = false }) {
   const { currentUser, logout } = useApp()
