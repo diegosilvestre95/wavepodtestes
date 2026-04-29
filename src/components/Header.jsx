@@ -1,5 +1,6 @@
 import { useApp } from '../context/AppContext'
 import { useNavigate, Link } from 'react-router-dom'
+import Logo from './Logo'
 
 export default function Header({ showAdminBtn = false, showLogout = false }) {
   const { logout } = useApp()
@@ -12,9 +13,8 @@ export default function Header({ showAdminBtn = false, showLogout = false }) {
 
   return (
     <header className="site-header">
-      <Link to="/" className="logo">
-        <div className="logo-mark" />
-        <div className="logo-text">WAVEPOD</div>
+      <Link to="/" style={{ textDecoration: 'none' }}>
+        <Logo size={42} light />
       </Link>
 
       <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>

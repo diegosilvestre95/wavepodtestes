@@ -8,15 +8,15 @@
 
 :root {
   --wp-yellow: #FFD700;
-  --wp-gold: #D4AF37;
-  --wp-silver-light: #F2F2F2;
-  --wp-silver-mid: #E0E0E0;
-  --wp-silver-dark: #C0C0C0;
+  --wp-gold: #FFB700; /* Dourado mais vibrante como o do logo */
+  --wp-silver-light: #E8E8E8;
+  --wp-silver-dark: #A0A0A0;
   --wp-black-tech: #1A1A1A;
   
   --grad-sidebar: linear-gradient(180deg, #FFFFFF 0%, #E0E0E0 100%);
-  --grad-metallic-card: linear-gradient(135deg, #F5F5F5 0%, #CCCCCC 100%);
-  --grad-dark-footer: linear-gradient(180deg, #4F4F4F 0%, #1A1A1A 100%);
+  --grad-metallic-card: linear-gradient(135deg, #F9F9F9 0%, #D1D1D1 100%);
+  --grad-logo-silver: linear-gradient(135deg, #E8E8E8 0%, #808080 100%);
+  --grad-logo-gold: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
   
   --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
   --shadow-card: 0 15px 35px rgba(0,0,0,0.1);

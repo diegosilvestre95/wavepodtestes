@@ -8,6 +8,7 @@ import Compras   from './admin/Compras'
 import Estoque   from './admin/Estoque'
 import Precos    from './admin/Precos'
 import Pedidos   from './admin/Pedidos'
+import Logo      from '../components/Logo'
 
 const NAV_ITEMS = [
   { id: 'pedidos',   label: 'Pedidos',   icon: '📋' },
@@ -35,12 +36,8 @@ export default function Admin() {
       {/* SIDEBAR REPLICADA (iMAC MOCKUP) */}
       <aside className="admin-sidebar">
         <div className="sidebar-logo-area">
-          <Link to="/" className="logo" style={{ marginBottom: 0 }}>
-             <div className="logo-mark" style={{ width: 36, height: 36 }} />
-             <div>
-                <div className="logo-text" style={{ fontSize: 18, color: '#000' }}>WAVEPOD</div>
-                <div className="logo-subtext">Pods Descartáveis</div>
-             </div>
+          <Link to="/" style={{ textDecoration: 'none' }}>
+             <Logo size={44} />
           </Link>
         </div>
 

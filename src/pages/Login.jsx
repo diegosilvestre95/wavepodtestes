@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import Logo from '../components/Logo'
 
 export default function Login() {
   const { login, toast } = useApp()
@@ -23,11 +24,9 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F5F5', padding: 24 }}>
-      <div className="stat-card" style={{ width: '100%', maxWidth: 400, background: '#fff', border: '1px solid #ddd', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', padding: 40, color: '#1a1a1a' }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div className="logo-mark" style={{ width: 60, height: 60, fontSize: 24, margin: '0 auto 20px' }}>WP</div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.02em' }}>WAVEPOD</h1>
-          <p style={{ color: '#888', fontSize: 13, marginTop: 4 }}>Controle Administrativo de Vendas</p>
+      <div style={{ width: '100%', maxWidth: 400, background: '#fff', border: '1px solid #ddd', boxShadow: '0 20px 50px rgba(0,0,0,0.05)', padding: 40, borderRadius: '20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 40, display: 'flex', justifyContent: 'center' }}>
+          <Logo size={80} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
