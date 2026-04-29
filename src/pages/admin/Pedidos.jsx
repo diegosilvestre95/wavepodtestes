@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
 import { useApp } from '../../context/AppContext'
@@ -7,6 +7,7 @@ export default function Pedidos() {
   const { toast } = useApp()
   const [pedidos, setPedidos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [busca, setBusca] = useState('')
 
   const carregar = async () => {
     setLoading(true)
@@ -16,6 +17,15 @@ export default function Pedidos() {
   }
 
   useEffect(() => { carregar() }, [])
+
+  const pedidosFiltrados = useMemo(() => {
+    return pedidos.filter(p => 
+      p.cliente_nome?.toLowerCase().includes(busca.toLowerCase()) || 
+      p.cliente_sobrenome?.toLowerCase().includes(busca.toLowerCase()) ||
+      p.status?.toLowerCase().includes(busca.toLowerCase()) ||
+      String(p.id).includes(busca)
+    )
+  }, [pedidos, busca])
 
   const updateStatus = async (id, status) => {
     const { error } = await sb.from('pedidos').update({ status }).eq('id', id)
@@ -46,61 +56,75 @@ export default function Pedidos() {
         </button>
       </div>
 
-      <div className="premium-table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID PEDIDO</th>
-              <th>CLIENTE</th>
-              <th>CONTATO</th>
-              <th>TOTAL</th>
-              <th>STATUS</th>
-              <th style={{ textAlign: 'right' }}>AÇÕES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pedidos.map(p => (
-              <tr key={p.id}>
-                <td style={{ fontFamily: 'monospace', color: '#52525b', fontWeight: 700 }}>#{String(p.id).slice(0,6).toUpperCase()}</td>
-                <td>
-                  <div style={{ fontWeight: 700 }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
-                  <div style={{ fontSize: 10, opacity: 0.4 }}>{new Date(p.created_at).toLocaleString()}</div>
-                </td>
-                <td>
-                  <a href={`https://wa.me/${p.cliente_whatsapp}`} target="_blank" rel="noreferrer" style={{ 
-                    color: '#a1a1aa', textDecoration: 'none', fontSize: 11, fontWeight: 800, 
-                    border: '1px solid #27272a', padding: '6px 12px', borderRadius: '8px'
-                  }}>
-                    CONTATO
-                  </a>
-                </td>
-                <td style={{ fontWeight: 800, fontSize: 15 }}>R$ {fmt(p.total)}</td>
-                <td>
-                  <div className="status-pill" style={{ color: getStatusColor(p.status) }}>
-                    <div className="status-dot" style={{ background: getStatusColor(p.status) }}></div>
-                    {p.status.toUpperCase()}
-                  </div>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button className="btn-action" 
-                            style={{ padding: '6px', minWidth: '32px', color: '#10b981', background: 'transparent' }} 
-                            title="Confirmar Pedido"
-                            onClick={() => updateStatus(p.id, 'Confirmado')}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    </button>
-                    <button className="btn-action" 
-                            style={{ padding: '6px', minWidth: '32px', color: '#ef4444', background: 'transparent' }} 
-                            title="Cancelar Pedido"
-                            onClick={() => updateStatus(p.id, 'Cancelado')}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                  </div>
-                </td>
+      <div className="ipad-card" style={{ padding: 0, overflow: 'hidden' }}>
+        {/* BARRA DE BUSCA */}
+        <div style={{ padding: '20px 30px', borderBottom: '1px solid #18181b', display: 'flex', alignItems: 'center', gap: 15 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input 
+            type="text" 
+            placeholder="Buscar por cliente, status ou ID do pedido..." 
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            style={{ background: 'transparent', border: 'none', fontSize: 16, padding: 0, width: '100%', fontWeight: 500 }}
+          />
+        </div>
+
+        <div className="premium-table-wrap" style={{ border: 'none', borderRadius: 0 }}>
+          <table>
+            <thead>
+              <tr>
+                <th style={{ paddingLeft: 30 }}>ID PEDIDO</th>
+                <th>CLIENTE</th>
+                <th>CONTATO</th>
+                <th>TOTAL</th>
+                <th>STATUS</th>
+                <th style={{ textAlign: 'right', paddingRight: 30 }}>AÇÕES</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pedidosFiltrados.map(p => (
+                <tr key={p.id}>
+                  <td style={{ paddingLeft: 30, fontFamily: 'monospace', color: '#52525b', fontWeight: 700 }}>#{String(p.id).slice(0,6).toUpperCase()}</td>
+                  <td>
+                    <div style={{ fontWeight: 700 }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
+                    <div style={{ fontSize: 10, opacity: 0.4 }}>{new Date(p.created_at).toLocaleString()}</div>
+                  </td>
+                  <td>
+                    <a href={`https://wa.me/${p.cliente_whatsapp}`} target="_blank" rel="noreferrer" style={{ 
+                      color: '#a1a1aa', textDecoration: 'none', fontSize: 11, fontWeight: 800, 
+                      border: '1px solid #27272a', padding: '6px 12px', borderRadius: '8px'
+                    }}>
+                      CONTATO
+                    </a>
+                  </td>
+                  <td style={{ fontWeight: 800, fontSize: 15 }}>R$ {fmt(p.total)}</td>
+                  <td>
+                    <div className="status-pill" style={{ color: getStatusColor(p.status) }}>
+                      <div className="status-dot" style={{ background: getStatusColor(p.status) }}></div>
+                      {p.status.toUpperCase()}
+                    </div>
+                  </td>
+                  <td style={{ paddingRight: 30 }}>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button className="btn-action" 
+                              style={{ padding: '6px', minWidth: '32px', color: '#10b981', background: 'transparent' }} 
+                              title="Confirmar Pedido"
+                              onClick={() => updateStatus(p.id, 'Confirmado')}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </button>
+                      <button className="btn-action" 
+                              style={{ padding: '6px', minWidth: '32px', color: '#ef4444', background: 'transparent' }} 
+                              title="Cancelar Pedido"
+                              onClick={() => updateStatus(p.id, 'Cancelado')}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
