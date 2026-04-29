@@ -198,9 +198,11 @@ export default function Compras() {
           disabled={loading}
           onClick={salvarCompra}
           style={{ 
-            height: 60, fontSize: 16, 
+            height: 56, fontSize: 13, fontWeight: 900,
             background: 'linear-gradient(90deg, #00d2ff 0%, #928dab 100%)', 
-            color: '#fff', marginTop: 10, borderRadius: 16 
+            color: '#fff', marginTop: 10, borderRadius: 12,
+            textTransform: 'uppercase', letterSpacing: '0.1em',
+            border: 'none', cursor: 'pointer', width: '100%'
           }}
         >
           {loading ? 'PROCESSANDO...' : 'Registrar compra ✓'}

@@ -55,7 +55,14 @@ export default function Precos() {
           <h1 style={{ fontSize: 32, fontWeight: 800 }}>Preços do Catálogo</h1>
           <p style={{ color: '#666', fontSize: 14 }}>Ajuste o valor global de cada modelo. Isso afetará todos os sabores simultaneamente.</p>
         </div>
-        <button className="btn-primary" onClick={salvarModelos} style={{ padding: '12px 24px' }}>SALVAR ALTERAÇÕES ✓</button>
+        <button className="btn-primary" onClick={salvarModelos} style={{ 
+          padding: '12px 24px',
+          background: 'linear-gradient(90deg, #00d2ff 0%, #928dab 100%)',
+          color: '#fff',
+          fontWeight: 900,
+          border: 'none',
+          borderRadius: '12px'
+        }}>SALVAR ALTERAÇÕES ✓</button>
       </div>
 
       <div className="ipad-grid">
