@@ -115,7 +115,7 @@ export default function Login() {
       <style>{`
         .login-container-new {
           min-height: 100vh;
-          background: var(--bg-silver-gradient);
+          background: #020617;
           display: flex;
           align-items: stretch;
           justify-content: stretch;
@@ -126,8 +126,8 @@ export default function Login() {
         .grid-overlay {
           position: absolute;
           inset: 0;
-          background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), 
-                            linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+          background-image: linear-gradient(rgba(15, 23, 42, 0.5) 1px, transparent 1px), 
+                            linear-gradient(90deg, rgba(15, 23, 42, 0.5) 1px, transparent 1px);
           background-size: 50px 50px;
           mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
         }
@@ -146,7 +146,7 @@ export default function Login() {
           flex-direction: column;
           justify-content: center;
           padding: 80px;
-          background: radial-gradient(circle at 0% 0%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
+          background: radial-gradient(circle at 0% 0%, rgba(255,215,0,0.03) 0%, transparent 50%);
         }
 
         .hero-title {
@@ -154,20 +154,20 @@ export default function Login() {
           font-weight: 800;
           line-height: 0.95;
           letter-spacing: -0.05em;
-          color: var(--text-dark);
+          color: #fff;
           margin-bottom: 24px;
         }
 
         .hero-title span {
-          color: var(--primary-yellow);
+          color: var(--wp-yellow);
         }
 
         .hero-desc {
-          font-size: 18px;
-          color: #475569;
+          font-size: 16px;
+          color: #64748b;
           line-height: 1.6;
-          margin-bottom: 40px;
-          max-width: 500px;
+          margin-bottom: 32px;
+          max-width: 460px;
         }
 
         .pill-group {
@@ -179,11 +179,11 @@ export default function Login() {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: rgba(255, 255, 255, 0.5);
-          border: 1px solid var(--wp-border);
+          background: rgba(15, 23, 42, 0.4);
+          border: 1px solid rgba(30, 41, 59, 0.5);
           padding: 10px 20px;
           border-radius: 12px;
-          color: var(--text-dark);
+          color: #94a3b8;
           font-size: 12px;
           font-weight: 700;
           text-transform: uppercase;
@@ -194,71 +194,70 @@ export default function Login() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(5px);
+          background: rgba(0,0,0,0.2);
           padding: 40px;
         }
 
         .login-card-premium {
           width: 100%;
           max-width: 480px;
-          background: var(--admin-card-bg);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--wp-border);
+          background: #0f172a;
+          border: 1px solid rgba(51, 65, 85, 0.4);
           padding: 60px;
           border-radius: 32px;
-          box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.9);
         }
 
         .form-group-premium {
-          margin-bottom: 24px;
+          margin-bottom: 20px;
         }
 
         .form-group-premium label {
           display: block;
           font-size: 12px;
           font-weight: 800;
-          color: #64748b;
-          margin-bottom: 10px;
+          color: #475569;
+          margin-bottom: 8px;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
 
         .form-group-premium input {
           width: 100%;
-          height: 56px;
-          background: #ffffff;
-          border: 1px solid var(--wp-border);
-          border-radius: 16px;
-          padding: 0 20px;
-          font-size: 15px;
-          color: var(--text-dark);
+          height: 52px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 0 18px;
+          font-size: 14px;
+          color: #0f172a;
           font-weight: 600;
           transition: all 0.2s;
         }
 
         .form-group-premium input:focus {
-          border-color: var(--primary-yellow);
-          box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.1);
+          border-color: var(--wp-yellow);
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.05);
         }
 
         .btn-login-glow {
           width: 100%;
-          height: 64px;
-          background: var(--primary-yellow);
+          height: 54px;
+          background: var(--wp-yellow);
           color: #000;
           border: none;
-          border-radius: 18px;
-          font-size: 14px;
+          border-radius: 12px;
+          font-size: 13px;
           font-weight: 900;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.08em;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
+          gap: 10px;
           cursor: pointer;
           transition: all 0.3s;
-          box-shadow: 0 10px 30px -10px rgba(251, 191, 36, 0.4);
+          box-shadow: 0 8px 20px -6px rgba(255, 215, 0, 0.4);
         }
 
         .btn-login-glow:hover {
