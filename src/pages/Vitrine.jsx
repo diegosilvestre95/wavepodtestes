@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from 'react'
+import { useState, useMemo, memo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { eKey } from '../lib/utils'
@@ -176,6 +176,10 @@ function WaFloat() {
 export default function Vitrine() {
   const { catalogo, produtosDB, estoqueMap, cart, addToCart, loading } = useApp()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }, [])
 
   const sidebarCats = useMemo(() =>
     catalogo.map(cat => ({

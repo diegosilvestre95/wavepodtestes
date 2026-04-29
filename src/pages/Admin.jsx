@@ -73,6 +73,10 @@ export default function Admin() {
   const [tela, setTela]     = useState('dashboard')
   const [notif, setNotif]   = useState(null)
 
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'light')
+  }, [])
+
   // Redireciona se não logado
   useEffect(() => {
     if (!currentUser) navigate('/login')

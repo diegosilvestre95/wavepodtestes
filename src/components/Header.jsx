@@ -13,7 +13,7 @@ export default function Header({ showAdminBtn = false, showLogout = false }) {
   return (
     <header className="site-header">
       <span className="logo">
-        <span className="logo-mark">〜</span>
+        <span className="logo-mark">WP</span>
         <span className="logo-text">WAVEPOD</span>
       </span>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { sb } from '../lib/supabase'
@@ -15,6 +15,10 @@ export default function Checkout() {
   const [pagSel, setPag]  = useState(null)
   const [loading, setLoading] = useState(false)
   const [sucesso, setSucesso] = useState(null) // número do pedido
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }, [])
 
   const total = cart.reduce((a, i) => a + i.preco * i.qty, 0)
   const count = cart.reduce((a, i) => a + i.qty, 0)

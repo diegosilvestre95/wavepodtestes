@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
@@ -7,6 +7,10 @@ export default function Login() {
   const navigate = useNavigate()
   const [user, setUser]   = useState('')
   const [pass, setPass]   = useState('')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'light')
+  }, [])
 
   const handleLogin = () => {
     if (login(user.trim(), pass)) {
@@ -21,8 +25,8 @@ export default function Login() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div className="card" style={{ width: '100%', maxWidth: 360 }}>
         <div style={{ marginBottom: 24 }}>
-          <span className="logo" style={{ fontSize: 17 }}>
-            <span className="logo-mark" style={{ fontSize: 18 }}>〜</span>
+          <span className="logo" style={{ fontSize: 22 }}>
+            <span className="logo-mark">WP</span>
             <span className="logo-text">WAVEPOD Admin</span>
           </span>
         </div>
