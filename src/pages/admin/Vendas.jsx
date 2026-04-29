@@ -31,6 +31,12 @@ export default function Vendas() {
     setLoading(true)
     const p = produtos.find(i => i.id === parseInt(form.produtoId))
     
+    if (p.quantidade < parseInt(form.quantidade)) {
+      alert(`Estoque insuficiente! Disponível: ${p.quantidade}`)
+      setLoading(false)
+      return
+    }
+
     try {
       await sb.from('vendas').insert([{
         produto_id: p.id, nome_produto: p.nome, sabor_produto: p.sabor,
@@ -46,28 +52,29 @@ export default function Vendas() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800 }}>Terminal de Operações</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Processamento manual de saídas de estoque.</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Processamento manual de saídas e vendas locais.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 24, alignItems: 'start' }}>
         
-        {/* 💰 INPUT CONSOLE */}
         <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Nova Transação</h3>
+          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Nova Venda</h3>
           <form onSubmit={handleVenda}>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Buscar no Catálogo</label>
-              <input className="input-field" placeholder="Digite modelo ou sabor..." value={busca} onChange={e => setBusca(e.target.value)} />
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Pesquisar no Catálogo</label>
+              <input className="input-field" placeholder="Ignite, Oxbar, Sabor..." value={busca} onChange={e => setBusca(e.target.value)} />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Selecionar Recurso</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Selecionar Item</label>
               <select className="input-field" value={form.produtoId} onChange={e => {
                 const p = produtos.find(i => i.id === parseInt(e.target.value))
                 setForm({...form, produtoId: e.target.value, preco_venda: p?.preco_venda || ''})
               }}>
                 <option value="">— SELECIONE —</option>
                 {prodFiltrados.map(p => (
-                  <option key={p.id} value={p.id}>{p.nome} {p.sabor} ({p.quantidade} un)</option>
+                  <option key={p.id} value={p.id} disabled={p.quantidade <= 0}>
+                    {p.nome} {p.sabor} [{p.quantidade} UN]
+                  </option>
                 ))}
               </select>
             </div>
@@ -82,17 +89,16 @@ export default function Vendas() {
               </div>
             </div>
             <button className="btn-primary" style={{ width: '100%', padding: 12 }} disabled={loading}>
-              {loading ? 'EXECUTANDO...' : 'CONFIRMAR VENDA'}
+              {loading ? 'PROCESSANDO...' : 'REGISTRAR SAÍDA'}
             </button>
           </form>
         </div>
 
-        {/* 📊 HISTORY LOG */}
         <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Histórico do Terminal</h3>
+          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Histórico de Saídas</h3>
           <table className="data-table">
             <thead>
-              <tr><th>Produto</th><th>Qtd</th><th>Total</th><th>Data/Hora</th></tr>
+              <tr><th>Produto</th><th>Qtd</th><th>Unitário</th><th>Total</th><th>Data/Hora</th></tr>
             </thead>
             <tbody>
               {vendas.slice(0, 15).map(v => (
@@ -102,7 +108,8 @@ export default function Vendas() {
                     <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{v.sabor_produto}</div>
                   </td>
                   <td>{v.quantidade} <small>UN</small></td>
-                  <td style={{ fontWeight: 700 }}>R$ {fmt(v.preco_venda * v.quantidade)}</td>
+                  <td>R$ {fmt(v.preco_venda)}</td>
+                  <td style={{ fontWeight: 700, color: '#16a34a' }}>R$ {fmt(v.preco_venda * v.quantidade)}</td>
                   <td style={{ fontSize: 10, color: 'var(--text-muted)' }}>{new Date(v.data).toLocaleString()}</td>
                 </tr>
               ))}
