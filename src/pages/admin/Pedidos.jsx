@@ -35,76 +35,58 @@ export default function Pedidos() {
     }
   }
 
-  if (loading) return (
-    <div style={{ height: '40vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="loader"></div>
-    </div>
-  )
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SYNCING_REQUEST_QUEUE...</div>
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#FFF' }}>Requests <span style={{ color: 'var(--wp-yellow)' }}>Pipeline</span></h1>
-          <p style={{ color: 'var(--text-dim)', fontSize: 14 }}>Real-time synchronization of storefront acquisition nodes.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Request Processing</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Operational queue for storefront transactions.</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
            <input 
-             className="input-premium" 
-             style={{ width: 300, background: 'rgba(255,255,255,0.02)' }} 
+             className="input-field" 
+             style={{ width: 260 }} 
              placeholder="Search by ID or Client..." 
              value={busca}
              onChange={e => setBusca(e.target.value)}
            />
-           <button onClick={carregar} className="btn-ultimate" style={{ padding: '0 20px', background: 'transparent', border: '1px solid var(--border)', color: '#FFF' }}>
-              SYNC
-           </button>
+           <button onClick={carregar} className="btn-outline" style={{ padding: '0 16px' }}>REFRESH</button>
         </div>
       </div>
 
-      <div className="premium-card">
-        <table className="wp-surface">
+      <div style={{ background: '#FFF', border: '1px solid var(--border)', borderRadius: 6, overflow: 'hidden' }}>
+        <table className="data-table" style={{ border: 'none' }}>
           <thead>
             <tr>
               <th>Request ID</th>
               <th>Client Node</th>
-              <th>Total Yield</th>
+              <th>Financial Volume</th>
               <th>Status</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
+              <th style={{ textAlign: 'right' }}>Resolution</th>
             </tr>
           </thead>
           <tbody>
             {pedidosFiltrados.map(p => (
               <tr key={p.id}>
-                <td style={{ fontWeight: 800, color: 'var(--text-dark)', fontFamily: 'var(--font-mono)' }}>
-                  REQ_{String(p.id).slice(-6).toUpperCase()}
+                <td style={{ fontWeight: 800, color: 'var(--text-muted)', fontFamily: 'var(--font-tech)', fontSize: 11 }}>
+                  #REQ_{String(p.id).slice(-6).toUpperCase()}
                 </td>
                 <td>
-                  <div style={{ fontWeight: 700, color: '#FFF' }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-dark)' }}>{new Date(p.created_at).toLocaleDateString()}</div>
+                  <div style={{ fontWeight: 700 }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{new Date(p.created_at).toLocaleDateString()}</div>
                 </td>
-                <td style={{ fontWeight: 900, color: 'var(--wp-yellow)', fontSize: 16 }}>R$ {fmt(p.total)}</td>
+                <td style={{ fontWeight: 800, fontSize: 14 }}>R$ {fmt(p.total)}</td>
                 <td>
-                  <span className={`status-chip ${p.status === 'Confirmado' ? 'success' : p.status === 'Cancelado' ? 'warning' : ''}`}>
-                    {p.status}
+                  <span className={`badge ${p.status === 'Confirmado' ? 'badge-success' : 'badge-warning'}`}>
+                    {p.status.toUpperCase()}
                   </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-                    <button 
-                      onClick={() => updateStatus(p.id, 'Confirmado')} 
-                      className="status-chip success" 
-                      style={{ cursor: 'pointer', border: 'none', padding: '8px 12px' }}
-                    >
-                      APPROVE
-                    </button>
-                    <button 
-                      onClick={() => updateStatus(p.id, 'Cancelado')} 
-                      className="status-chip warning" 
-                      style={{ cursor: 'pointer', border: 'none', padding: '8px 12px' }}
-                    >
-                      REJECT
-                    </button>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button onClick={() => updateStatus(p.id, 'Confirmado')} className="btn-primary" style={{ padding: '4px 10px', fontSize: 10 }}>APPROVE</button>
+                    <button onClick={() => updateStatus(p.id, 'Cancelado')} className="btn-outline" style={{ padding: '4px 10px', fontSize: 10, color: '#DC2626' }}>REJECT</button>
                   </div>
                 </td>
               </tr>

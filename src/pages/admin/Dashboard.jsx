@@ -16,7 +16,7 @@ export default function Dashboard() {
       ])
       setData({ vendas: v.data || [], compras: c.data || [], pedidos: p.data || [] })
     } catch (err) {
-      console.error("Critical System Load Error:", err)
+      console.error("Dashboard Load Failure:", err)
     }
     setLoading(false)
   }
@@ -31,109 +31,92 @@ export default function Dashboard() {
     return { investido, faturamento, lucro: faturamento - investido }
   }, [data])
 
-  if (loading) return (
-    <div style={{ height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
-      <div className="loader"></div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '0.2em' }}>SYSTEM_BOOTING...</div>
-    </div>
-  )
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SYNCING_SYSTEM_DATA...</div>
 
   return (
     <div>
-      <div style={{ marginBottom: 48 }}>
-        <h1 style={{ fontSize: 42, fontWeight: 900, letterSpacing: '-0.05em', color: '#FFF' }}>Overview <span style={{ color: 'var(--wp-yellow)' }}>Matrix</span></h1>
-        <p style={{ color: 'var(--text-dim)', fontSize: 16, marginTop: 8 }}>Operational intelligence and financial distribution nodes.</p>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800 }}>Analytical Overview</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Enterprise-level operational and financial metrics.</p>
       </div>
 
-      {/* 📊 KPI MATRIX */}
-      <div className="stats-grid">
-        <div className="stat-box">
-          <div className="stat-title">Invested Capital</div>
-          <div className="stat-value">R$ {fmt(stats.investido)}</div>
-          <div className="stat-trend" style={{ color: 'var(--text-dark)' }}>
-             NET_COST_EXPOSURE
-          </div>
+      {/* 📊 KPI ROW (4 CARDS) */}
+      <div className="dashboard-grid">
+        <div className="kpi-card">
+          <div className="kpi-title">Capital Invested</div>
+          <div className="kpi-value">R$ {fmt(stats.investido)}</div>
+          <div className="kpi-trend" style={{ color: 'var(--text-muted)' }}>Inventory Exposure</div>
         </div>
-        <div className="stat-box" style={{ borderLeft: '4px solid var(--wp-yellow)' }}>
-          <div className="stat-title">Gross Revenue</div>
-          <div className="stat-value">R$ {fmt(stats.faturamento)}</div>
-          <div className="stat-trend" style={{ color: 'var(--wp-yellow)' }}>
-             ⚡ +12.4% PERFORMANCE
-          </div>
+        <div className="kpi-card">
+          <div className="kpi-title">Gross Revenue</div>
+          <div className="kpi-value">R$ {fmt(stats.faturamento)}</div>
+          <div className="kpi-trend" style={{ color: '#16a34a' }}>+12.5% vs Last Period</div>
         </div>
-        <div className="stat-box">
-          <div className="stat-title">Net Profit</div>
-          <div className="stat-value" style={{ color: 'var(--wp-yellow)' }}>R$ {fmt(stats.lucro)}</div>
-          <div className="stat-trend" style={{ color: '#4ade80' }}>
-             🚀 GROWTH_OPTIMIZED
-          </div>
+        <div className="kpi-card">
+          <div className="kpi-title">Net Profit</div>
+          <div className="kpi-value" style={{ color: 'var(--wp-yellow-dark)' }}>R$ {fmt(stats.lucro)}</div>
+          <div className="kpi-trend" style={{ color: '#16a34a' }}>Performance Optimal</div>
         </div>
-        <div className="stat-box" style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.1) 0%, transparent 100%)' }}>
-          <div className="stat-title">Partner Yield</div>
-          <div className="stat-value">R$ {fmt(stats.lucro / 2)}</div>
-          <div className="stat-trend">DISTRIBUTION_ACTIVE</div>
+        <div className="kpi-card">
+          <div className="kpi-title">Partner Yield</div>
+          <div className="kpi-value">R$ {fmt(stats.lucro / 2)}</div>
+          <div className="kpi-trend">Fixed 50/50 Split</div>
         </div>
       </div>
 
-      {/* 🧱 DATA NODES */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 32 }}>
+      {/* 🧱 DATA BLOCKS */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: 24 }}>
         
-        {/* RECENT OPERATIONS */}
-        <div className="premium-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
-             <h3 style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-mono)' }}>Operations Log</h3>
-             <button style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>EXPORT_CSV</button>
+        {/* RECENT SALES (DENSE TABLE) */}
+        <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+             <h3 style={{ fontSize: 14, fontWeight: 700 }}>Operation Log</h3>
+             <button className="btn-outline" style={{ padding: '4px 10px', fontSize: 10 }}>VIEW_ALL</button>
           </div>
           
-          <table className="wp-surface">
+          <table className="data-table">
             <thead>
               <tr>
-                <th>Resource</th>
-                <th>Units</th>
+                <th>Resource Node</th>
                 <th>Volume</th>
-                <th>Type</th>
+                <th>Yield</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {data.vendas.slice(0, 7).map(v => (
+              {data.vendas.slice(0, 10).map(v => (
                 <tr key={v.id}>
                   <td>
                     <div style={{ fontWeight: 700 }}>{v.nome_produto}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-dark)' }}>{v.sabor_produto}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{v.sabor_produto}</div>
                   </td>
-                  <td style={{ fontWeight: 600 }}>{v.quantidade} <span style={{fontSize:10, color:'var(--text-dark)'}}>UN</span></td>
-                  <td style={{ fontWeight: 800 }}>R$ {fmt(v.preco_venda)}</td>
-                  <td>
-                    <span className="status-chip success">TERMINAL_SALE</span>
-                  </td>
+                  <td>{v.quantidade} <small>UN</small></td>
+                  <td style={{ fontWeight: 700 }}>R$ {fmt(v.preco_venda)}</td>
+                  <td><span className="badge badge-success">COMPLETED</span></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* REQUESTS PIPELINE */}
-        <div className="premium-card gold-edge" style={{ background: 'linear-gradient(180deg, #18181b 0%, #09090b 100%)' }}>
-          <h3 style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-mono)', marginBottom: 32 }}>Requests Pipeline</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {data.pedidos.slice(0, 6).map(p => (
-              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
+        {/* PIPELINE (DENSE LIST) */}
+        <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 20 }}>Request Pipeline</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {data.pedidos.slice(0, 8).map(p => (
+              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 800, color: '#FFF' }}>REQ_{String(p.id).slice(-6).toUpperCase()}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-dark)', marginTop: 2 }}>{new Date(p.created_at).toLocaleDateString()}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700 }}>{p.cliente_nome}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{String(p.id).slice(-6).toUpperCase()}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 900, color: 'var(--wp-yellow)' }}>R$ {fmt(p.total)}</div>
-                  <span className={`status-chip ${p.status === 'Confirmado' ? 'success' : ''}`} style={{ fontSize: 9, marginTop: 6, display: 'inline-block' }}>
-                    {p.status}
-                  </span>
+                  <div style={{ fontWeight: 800 }}>R$ {fmt(p.total)}</div>
+                  <div style={{ fontSize: 9, color: p.status === 'Confirmado' ? '#166534' : '#6B7280', fontWeight: 800 }}>{p.status.toUpperCase()}</div>
                 </div>
               </div>
             ))}
           </div>
-          <button className="btn-ultimate" style={{ width: '100%', marginTop: 32, height: 48, fontSize: 12 }}>
-             ACCESS_ALL_REQUESTS
-          </button>
+          <button className="btn-primary" style={{ width: '100%', marginTop: 20 }}>MANAGE_PIPELINE</button>
         </div>
 
       </div>
