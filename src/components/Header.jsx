@@ -13,18 +13,18 @@ export default function Header({ showAdminBtn = false, showLogout = false }) {
   return (
     <header className="site-header">
       <Link to="/" className="logo">
-        <div className="logo-mark">WP</div>
+        <div className="logo-mark" />
         <div className="logo-text">WAVEPOD</div>
       </Link>
 
-      <div style={{ display: 'flex', gap: '12px' }}>
+      <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
         {showAdminBtn && (
-          <button onClick={() => navigate('/admin')} className="btn-ghost" style={{ padding: '8px 16px', fontSize: 12 }}>
-            👑 Admin
+          <button onClick={() => navigate('/admin')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 11, borderRadius: '30px' }}>
+             Admin Panel
           </button>
         )}
         {showLogout && (
-          <button onClick={handleLogout} className="btn-ghost" style={{ padding: '8px 16px', fontSize: 12 }}>
+          <button onClick={handleLogout} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 12 }}>
             Sair
           </button>
         )}
