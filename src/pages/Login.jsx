@@ -4,121 +4,269 @@ import { useApp } from '../context/AppContext'
 import Logo from '../components/Logo'
 
 export default function Login() {
-  const [user, setUser] = useState('')
-  const [pass, setPass] = useState('')
-  const { login, loading } = useApp()
+  const { login } = useApp()
   const navigate = useNavigate()
+  const [email, setEmail] = useState('')
+  const [pass, setPass] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    const success = await login(user, pass)
+    setLoading(true)
+    const success = await login(email, pass)
     if (success) navigate('/admin')
+    setLoading(false)
   }
 
   return (
-    <div className="login-portal" style={{ 
-      display: 'flex', 
-      minHeight: '100vh',
-      background: '#09090b',
-      color: '#fff'
-    }}>
-      
-      {/* LADO ESQUERDO: BRANDING & IMPACTO (DESKTOP ONLY) */}
-      <div className="login-hero" style={{ 
-        flex: 1, 
-        background: 'radial-gradient(circle at 70% 30%, #1a1a1e 0%, #09090b 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        padding: '80px',
-        borderRight: '1px solid #18181b',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <div style={{ position: 'relative', zIndex: 10 }}>
-          <Logo size={120} showText={false} light />
-          <h1 style={{ fontSize: 56, fontWeight: 800, marginTop: 40, lineHeight: 1.1, letterSpacing: '-0.04em' }}>
-            A Gestão do Seu <br/>
-            <span style={{ color: 'var(--wp-yellow)' }}>Lucro Começa Aqui.</span>
+    <div className="login-container-new">
+      {/* BACKGROUND GRID MESH */}
+      <div className="grid-overlay"></div>
+
+      <div className="login-content-split">
+        
+        {/* HERO SECTION (LEFT) */}
+        <div className="hero-section">
+          <div style={{ marginBottom: 40 }}>
+             <Logo size={80} light />
+          </div>
+          <h1 className="hero-title">
+            A Gestão do Seu Lucro<br />
+            <span>Começa Aqui</span>
           </h1>
-          <p style={{ marginTop: 24, color: '#52525b', fontSize: 18, maxWidth: 400, lineHeight: 1.6 }}>
-            Bem-vindo ao ERP WavePod. Controle seus dividendos, estoque e vendas em uma interface de alta performance.
+          <p className="hero-desc">
+            O WavePod Admin é a plataforma definitiva para centralizar suas vendas, 
+            automatizar o controle de estoque e escalar seus lucros através de uma 
+            gestão ERP inteligente e integrada.
           </p>
+
+          <div className="pill-group">
+            <div className="pill-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.9.9L21 3z"></path></svg>
+              WhatsApp
+            </div>
+            <div className="pill-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+              ERP Inteligente
+            </div>
+            <div className="pill-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="22 2 15 22 11 13 2 9 22 2"></polyline></svg>
+              Escala
+            </div>
+          </div>
         </div>
 
-        {/* EFEITOS DE FUNDO */}
-        <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: 400, height: 400, background: 'var(--wp-yellow)', filter: 'blur(180px)', opacity: 0.05 }}></div>
-      </div>
-
-      {/* LADO DIREITO: FORMULÁRIO DE ACESSO */}
-      <div className="login-form-side" style={{ 
-        width: '500px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '40px',
-        background: '#09090b'
-      }}>
-        
-        <div style={{ width: '100%', maxWidth: '360px', animation: 'fadeIn 0.6s ease-out' }}>
-          <div style={{ marginBottom: 40 }}>
-             <Logo size={40} light />
-             <h2 style={{ fontSize: 24, fontWeight: 800, marginTop: 20 }}>Portal Administrativo</h2>
-             <p style={{ color: '#52525b', fontSize: 14 }}>Insira suas credenciais para gerenciar a operação.</p>
-          </div>
-
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div className="form-group">
-              <label style={{ color: '#3f3f46', fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', marginBottom: 8, display: 'block' }}>IDENTIFICAÇÃO</label>
-              <input 
-                type="text" 
-                placeholder="Nome de usuário" 
-                value={user} 
-                onChange={e => setUser(e.target.value)}
-                style={{ background: '#121212', height: 52, border: '1px solid #1e1e22' }}
-              />
+        {/* LOGIN CARD (RIGHT) */}
+        <div className="login-card-wrapper">
+          <div className="login-card-premium">
+            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+               <div style={{ display: 'inline-block', padding: 12, background: 'rgba(255,215,0,0.05)', borderRadius: 16, marginBottom: 15 }}>
+                  <Logo size={40} showText={false} light />
+               </div>
+               <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: '-0.02em', color: '#fff' }}>WavePod Admin</h2>
+               <p style={{ fontSize: 13, color: '#52525b', fontWeight: 500 }}>Painel de Controle</p>
             </div>
 
-            <div className="form-group">
-              <label style={{ color: '#3f3f46', fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', marginBottom: 8, display: 'block' }}>SENHA PRIVADA</label>
-              <input 
-                type="password" 
-                placeholder="••••••••" 
-                value={pass} 
-                onChange={e => setPass(e.target.value)}
-                style={{ background: '#121212', height: 52, border: '1px solid #1e1e22' }}
-              />
-            </div>
+            <form onSubmit={handleLogin}>
+              <div className="form-group-premium">
+                <label>E-mail</label>
+                <input 
+                  type="email" 
+                  placeholder="seu@email.com" 
+                  value={email} 
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-            <button 
-              type="submit" 
-              className="btn-primary" 
-              disabled={loading}
-              style={{ 
-                marginTop: 10, 
-                height: 56, 
-                fontSize: 14,
-                boxShadow: '0 15px 30px rgba(255, 215, 0, 0.1)'
-              }}
-            >
-              {loading ? 'AUTENTICANDO...' : 'ACESSAR DASHBOARD →'}
-            </button>
-          </form>
+              <div className="form-group-premium">
+                <label>Senha</label>
+                <input 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={pass} 
+                  onChange={e => setPass(e.target.value)}
+                  required
+                />
+              </div>
 
-          <div style={{ marginTop: 60, fontSize: 10, color: '#27272a', fontWeight: 600, textAlign: 'center' }}>
-            WAVEPOD v2.0.4 · SISTEMA DE GESTÃO SOCIETÁRIA
+              <button className="btn-login-glow" disabled={loading}>
+                {loading ? 'AUTENTICANDO...' : (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    ENTRAR NO PAINEL
+                  </>
+                )}
+              </button>
+            </form>
+
+            <p style={{ marginTop: 30, fontSize: 11, color: '#3f3f46', textAlign: 'center' }}>
+               Acesso restrito a administradores autorizados.
+            </p>
           </div>
         </div>
 
       </div>
 
       <style>{`
+        .login-container-new {
+          min-height: 100vh;
+          background: #020617;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          padding: 40px;
+        }
+
+        .grid-overlay {
+          position: absolute;
+          inset: 0;
+          background-image: linear-gradient(rgba(15, 23, 42, 0.5) 1px, transparent 1px), 
+                            linear-gradient(90deg, rgba(15, 23, 42, 0.5) 1px, transparent 1px);
+          background-size: 50px 50px;
+          mask-image: radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%);
+        }
+
+        .login-content-split {
+          width: 100%;
+          max-width: 1200px;
+          display: grid;
+          grid-template-columns: 1.2fr 1fr;
+          gap: 100px;
+          position: relative;
+          z-index: 10;
+        }
+
+        .hero-section {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .hero-title {
+          font-size: 64px;
+          font-weight: 900;
+          line-height: 1;
+          letter-spacing: -0.04em;
+          color: #fff;
+          margin-bottom: 24px;
+        }
+
+        .hero-title span {
+          color: var(--wp-yellow);
+        }
+
+        .hero-desc {
+          font-size: 18px;
+          color: #94a3b8;
+          line-height: 1.6;
+          margin-bottom: 40px;
+          max-width: 500px;
+        }
+
+        .pill-group {
+          display: flex;
+          gap: 12px;
+        }
+
+        .pill-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(30, 41, 59, 0.5);
+          border: 1px solid rgba(51, 65, 85, 0.5);
+          padding: 8px 16px;
+          border-radius: 100px;
+          color: #f1f5f9;
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .login-card-wrapper {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .login-card-premium {
+          width: 100%;
+          max-width: 450px;
+          background: rgba(15, 23, 42, 0.6);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(51, 65, 85, 0.5);
+          padding: 60px 50px;
+          border-radius: 40px;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group-premium {
+          margin-bottom: 24px;
+        }
+
+        .form-group-premium label {
+          display: block;
+          font-size: 13px;
+          font-weight: 700;
+          color: #cbd5e1;
+          margin-bottom: 10px;
+        }
+
+        .form-group-premium input {
+          width: 100%;
+          height: 56px;
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          padding: 0 20px;
+          font-size: 15px;
+          color: #0f172a;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+
+        .form-group-premium input:focus {
+          border-color: var(--wp-yellow);
+          box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        }
+
+        .btn-login-glow {
+          width: 100%;
+          height: 64px;
+          background: var(--wp-yellow);
+          color: #000;
+          border: none;
+          border-radius: 18px;
+          font-size: 14px;
+          font-weight: 900;
+          letter-spacing: 0.05em;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          cursor: pointer;
+          transition: all 0.3s;
+          box-shadow: 0 10px 30px -10px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-login-glow:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 20px 40px -10px rgba(255, 215, 0, 0.6);
+        }
+
         @media (max-width: 1024px) {
-          .login-hero { display: none !important; }
-          .login-form-side { width: 100% !important; }
+          .login-content-split {
+            grid-template-columns: 1fr;
+            gap: 60px;
+          }
+          .hero-section {
+            text-align: center;
+            align-items: center;
+          }
+          .hero-title { font-size: 48px; }
         }
       `}</style>
-
     </div>
   )
 }
