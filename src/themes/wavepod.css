@@ -32,6 +32,14 @@ body { font-family: 'Inter', sans-serif; background: var(--wp-bg-deep); color: #
   display: flex; flex-direction: column; align-items: center; padding: 30px 0;
   flex-shrink: 0;
 }
+.slim-nav-item {
+  width: 56px; height: 56px; border-radius: 14px; display: flex;
+  align-items: center; justify-content: center;
+  color: #52525b; cursor: pointer; transition: 0.2s; margin-bottom: 12px;
+}
+.slim-nav-item svg { width: 24px; height: 24px; }
+.slim-nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.slim-nav-item.active { background: rgba(255,215,0,0.1); color: var(--wp-yellow); }
 
 /* ── CARDS & GRIDS FLUIDOS ── */
 .ipad-grid { 
@@ -59,6 +67,20 @@ input:focus { border-color: var(--wp-yellow); box-shadow: 0 0 15px var(--wp-yell
   font-weight: 800; border: none; cursor: pointer; transition: 0.3s; text-transform: uppercase;
 }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px var(--wp-yellow-glow); }
+
+.btn-action {
+  background: #18181b; color: #a1a1aa; padding: 8px 16px; border-radius: 8px;
+  font-weight: 700; font-size: 11px; border: 1px solid #27272a; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: 0.2s;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.btn-action:hover { background: #27272a; color: #fff; border-color: #3f3f46; }
+
+.status-pill { 
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px 0; font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; }
 
 /* ── TABELAS ADAPTÁVEIS ── */
 .premium-table-wrap { 

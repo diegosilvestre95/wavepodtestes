@@ -25,6 +25,12 @@ export default function Pedidos() {
     }
   }
 
+  const getStatusColor = (s) => {
+    if (s === 'Confirmado') return '#10b981'
+    if (s === 'Cancelado') return '#ef4444'
+    return 'var(--wp-yellow)'
+  }
+
   if (loading) return <div style={{ padding: 40, color: '#666' }}>Sincronizando fila de pedidos...</div>
 
   return (
@@ -34,7 +40,10 @@ export default function Pedidos() {
           <h1 style={{ fontSize: 32, fontWeight: 800 }}>Fila de Pedidos</h1>
           <p style={{ color: '#666', fontSize: 14 }}>Acompanhe e gerencie as solicitações da vitrine em tempo real.</p>
         </div>
-        <button className="btn-action" onClick={carregar}>🔄 ATUALIZAR FILA</button>
+        <button className="btn-action" onClick={carregar}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          Atualizar Dados
+        </button>
       </div>
 
       <div className="premium-table-wrap">
@@ -46,38 +55,46 @@ export default function Pedidos() {
               <th>CONTATO</th>
               <th>TOTAL</th>
               <th>STATUS</th>
-              <th>AÇÕES</th>
+              <th style={{ textAlign: 'right' }}>AÇÕES</th>
             </tr>
           </thead>
           <tbody>
             {pedidos.map(p => (
               <tr key={p.id}>
-                <td style={{ fontFamily: 'monospace', color: 'var(--wp-yellow)', fontWeight: 700 }}>#{String(p.id).slice(0,6).toUpperCase()}</td>
+                <td style={{ fontFamily: 'monospace', color: '#52525b', fontWeight: 700 }}>#{String(p.id).slice(0,6).toUpperCase()}</td>
                 <td>
                   <div style={{ fontWeight: 700 }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
-                  <div style={{ fontSize: 10, opacity: 0.5 }}>{new Date(p.created_at).toLocaleString()}</div>
+                  <div style={{ fontSize: 10, opacity: 0.4 }}>{new Date(p.created_at).toLocaleString()}</div>
                 </td>
                 <td>
                   <a href={`https://wa.me/${p.cliente_whatsapp}`} target="_blank" rel="noreferrer" style={{ 
-                    color: '#22c55e', textDecoration: 'none', fontSize: 11, fontWeight: 800, 
-                    background: 'rgba(34,197,94,0.1)', padding: '6px 12px', borderRadius: '8px'
+                    color: '#a1a1aa', textDecoration: 'none', fontSize: 11, fontWeight: 800, 
+                    border: '1px solid #27272a', padding: '6px 12px', borderRadius: '8px'
                   }}>
-                    💬 WHATSAPP
+                    CONTATO
                   </a>
                 </td>
-                <td style={{ fontWeight: 800, fontSize: 16 }}>R$ {fmt(p.total)}</td>
+                <td style={{ fontWeight: 800, fontSize: 15 }}>R$ {fmt(p.total)}</td>
                 <td>
-                  <span className="status-pill" style={{ 
-                    background: p.status === 'Confirmado' ? '#10b981' : p.status === 'Cancelado' ? '#ef4444' : 'var(--wp-yellow)',
-                    color: p.status === 'Pendente' ? '#000' : '#fff'
-                  }}>
+                  <div className="status-pill" style={{ color: getStatusColor(p.status) }}>
+                    <div className="status-dot" style={{ background: getStatusColor(p.status) }}></div>
                     {p.status.toUpperCase()}
-                  </span>
+                  </div>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button className="btn-action" style={{ padding: '6px 10px', background: '#10b981' }} onClick={() => updateStatus(p.id, 'Confirmado')}>✓</button>
-                    <button className="btn-action" style={{ padding: '6px 10px', background: '#ef4444' }} onClick={() => updateStatus(p.id, 'Cancelado')}>✕</button>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button className="btn-action" 
+                            style={{ padding: '6px', minWidth: '32px', color: '#10b981', background: 'transparent' }} 
+                            title="Confirmar Pedido"
+                            onClick={() => updateStatus(p.id, 'Confirmado')}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                    <button className="btn-action" 
+                            style={{ padding: '6px', minWidth: '32px', color: '#ef4444', background: 'transparent' }} 
+                            title="Cancelar Pedido"
+                            onClick={() => updateStatus(p.id, 'Cancelado')}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                   </div>
                 </td>
               </tr>

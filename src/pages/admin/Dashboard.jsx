@@ -44,7 +44,10 @@ export default function Dashboard() {
             <h1 style={{ fontSize: 32, fontWeight: 800 }}>Visão Geral ERP</h1>
             <p style={{ color: '#666', fontSize: 14 }}>Controle de investimento, faturamento e divisão de lucros entre sócios.</p>
          </div>
-         <button className="btn-action" onClick={carregarDados}>🔄 ATUALIZAR DADOS</button>
+         <button className="btn-action" onClick={carregarDados}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+            Atualizar Dados
+         </button>
       </div>
 
       {/* CARDS FINANCEIROS (LÓGICA DOS SÓCIOS) */}
