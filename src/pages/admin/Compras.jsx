@@ -1,144 +1,192 @@
 import { useState, useEffect } from 'react'
 import { sb } from '../../lib/supabase'
 import { useApp } from '../../context/AppContext'
+import { fmt } from '../../lib/utils'
 
 export default function Compras() {
   const { toast } = useApp()
-  const [modelos, setModelos] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   
-  // Estados do formulário
-  const [sel, setSel] = useState('')
-  const [qtd, setQtd] = useState(0)
-  const [custo, setCusto] = useState('')
-  const [sabores, setSabores] = useState([]) // Array dinâmico de sabores
+  // Estado para múltiplos itens na mesma compra
+  const [itens, setItens] = useState([
+    { id: Date.now(), modelo: '', qtd: 0, custo: '', preco: '90', puffs: '', sabores: [] }
+  ])
+  const [frete, setFrete] = useState(0)
 
-  const carregar = async () => {
-    setLoading(true)
-    const { data } = await sb.from('produtos').select('nome').order('nome')
-    const unique = [...new Set(data?.map(i => i.nome))]
-    setModelos(unique)
-    setLoading(false)
+  // Adicionar novo bloco de item
+  const adicionarItem = () => {
+    setItens([...itens, { id: Date.now(), modelo: '', qtd: 0, custo: '', preco: '90', puffs: '', sabores: [] }])
   }
 
-  useEffect(() => { carregar() }, [])
-
-  // Efeito para gerar os campos de sabores dinamicamente quando a quantidade muda
-  useEffect(() => {
-    const q = parseInt(qtd) || 0
-    setSabores(Array(q).fill(''))
-  }, [qtd])
-
-  const handleSaborChange = (index, value) => {
-    const newSabores = [...sabores]
-    newSabores[index] = value
-    setSabores(newSabores)
+  // Remover bloco de item
+  const removerItem = (id) => {
+    if (itens.length > 1) setItens(itens.filter(i => i.id !== id))
   }
 
-  const registrarCompra = async () => {
-    if (!sel || !qtd || !custo || sabores.some(s => !s)) {
-      return toast('Preencha o modelo, custo e todos os sabores!', '⚠️')
-    }
-    
-    try {
-      for (const s of sabores) {
-        // Lógica Relacional: Verifica se esse sabor já existe para esse modelo
-        const { data: p } = await sb.from('produtos').select('*').eq('nome', sel).eq('sabor', s).single()
-
-        if (p) {
-          await sb.from('produtos').update({ 
-            quantidade: p.quantidade + 1,
-            custo_unitario: parseFloat(custo)
-          }).eq('id', p.id)
-        } else {
-          await sb.from('produtos').insert({
-            nome: sel,
-            sabor: s,
-            quantidade: 1,
-            custo_unitario: custo,
-            preco_venda: 90 // Preço inicial padrão
-          })
+  // Atualizar campos de um item específico
+  const updateItem = (id, field, value) => {
+    setItens(itens.map(item => {
+      if (item.id === id) {
+        const newItem = { ...item, [field]: value }
+        // Se mudar a quantidade, gera os campos de sabores
+        if (field === 'qtd') {
+          const q = parseInt(value) || 0
+          newItem.sabores = Array(q).fill('')
         }
+        return newItem
+      }
+      return item
+    }))
+  }
+
+  const updateSabor = (itemId, index, val) => {
+    setItens(itens.map(item => {
+      if (item.id === itemId) {
+        const newSabores = [...item.sabores]
+        newSabores[index] = val
+        return { ...item, sabores: newSabores }
+      }
+      return item
+    }))
+  }
+
+  // Cálculos ERP
+  const totalItens = itens.reduce((a, b) => a + (parseInt(b.qtd || 0) * parseFloat(b.custo || 0)), 0)
+  const totalCompra = totalItens + parseFloat(frete || 0)
+  const porSocio = totalCompra / 2
+
+  const salvarCompra = async () => {
+    setLoading(true)
+    try {
+      for (const item of itens) {
+        if (!item.modelo || !item.qtd || item.sabores.some(s => !s)) {
+          throw new Error(`Preencha todos os dados do modelo ${item.modelo || ''}`)
+        }
+
+        // Processa cada sabor individualmente (Lógica Relacional do Banco)
+        for (const s of item.sabores) {
+          const { data: p } = await sb.from('produtos').select('*').eq('nome', item.modelo).eq('sabor', s).single()
+
+          if (p) {
+            await sb.from('produtos').update({ 
+              quantidade: p.quantidade + 1,
+              custo_unitario: parseFloat(item.custo),
+              preco_venda: parseFloat(item.preco),
+              puffs: item.puffs
+            }).eq('id', p.id)
+          } else {
+            await sb.from('produtos').insert({
+              nome: item.modelo,
+              sabor: s,
+              quantidade: 1,
+              custo_unitario: item.custo,
+              preco_venda: item.preco,
+              puffs: item.puffs
+            })
+          }
+        }
+
+        // Registra a transação individual na tabela de Compras para o Dashboard
+        await sb.from('compras').insert({
+          produto_nome: item.modelo,
+          quantidade: item.qtd,
+          investimento_total: (item.qtd * item.custo) + (parseFloat(frete) / itens.length)
+        })
       }
 
-      // Registra a transação na tabela de Compras
-      await sb.from('compras').insert({
-        produto_nome: sel,
-        quantidade: qtd,
-        investimento_total: qtd * custo
-      })
-
-      toast('Compra e sabores registrados com sucesso!', '📥')
-      setSel(''); setQtd(0); setCusto(''); setSabores([]);
+      toast('Compra registrada e estoque atualizado!', '📥')
+      setItens([{ id: Date.now(), modelo: '', qtd: 0, custo: '', preco: '90', puffs: '', sabores: [] }])
+      setFrete(0)
     } catch (e) {
-      toast('Erro ao processar entrada', '❌')
+      toast(e.message || 'Erro ao registrar compra', '❌')
     }
+    setLoading(false)
   }
-
-  if (loading) return <div style={{ padding: 40, color: '#666' }}>Lendo banco de dados...</div>
 
   return (
     <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
       <div style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800 }}>Compras</h1>
-        <p style={{ color: '#666', fontSize: 14 }}>Registre o investimento e as variações de sabor da nova remessa.</p>
+        <h1 style={{ fontSize: 32, fontWeight: 800 }}>Registrar compra</h1>
+        <p style={{ color: '#666', fontSize: 14 }}>Adicione cada item com produto, sabor e quantidade. O estoque é atualizado automaticamente.</p>
       </div>
 
-      <div className="ipad-card" style={{ maxWidth: 700, background: '#121212' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
-          <div className="form-group">
-            <label>Modelo do Produto</label>
-            <select value={sel} onChange={e => setSel(e.target.value)} style={{ background: '#09090b' }}>
-              <option value="">— Selecione —</option>
-              {modelos.map(m => <option key={m} value={m}>{m}</option>)}
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Custo Unit. (R$)</label>
-            <input type="number" value={custo} onChange={e => setCusto(e.target.value)} style={{ background: '#09090b' }} />
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Quantidade de Unidades (Gera campos de sabor)</label>
-          <input 
-            type="number" 
-            min="0"
-            value={qtd} 
-            onChange={e => setQtd(e.target.value)} 
-            style={{ background: '#09090b', border: '1px solid var(--wp-yellow)' }} 
-          />
-        </div>
-
-        {/* CAMPOS DINÂMICOS DE SABORES */}
-        {sabores.length > 0 && (
-          <div style={{ 
-            marginTop: 30, padding: 25, background: '#09090b', borderRadius: 20, 
-            border: '1px solid #1e1e22', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 
-          }}>
-            <div style={{ gridColumn: '1 / -1', fontSize: 11, fontWeight: 800, color: '#52525b', marginBottom: 5 }}>
-              DEFINA OS SABORES DAS {qtd} UNIDADES:
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        
+        {itens.map((item, idx) => (
+          <div key={item.id} className="ipad-card" style={{ background: '#121212', position: 'relative' }}>
+            {itens.length > 1 && (
+              <button onClick={() => removerItem(item.id)} style={{ position: 'absolute', right: 20, top: 20, background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer' }}>✕</button>
+            )}
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 15, marginBottom: 20 }}>
+              <div className="form-group">
+                <label>PRODUTO (MODELO)</label>
+                <input type="text" placeholder="Ex: V80 Ignite, Elfbar..." value={item.modelo} onChange={e => updateItem(item.id, 'modelo', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>QTD TOTAL</label>
+                <input type="number" placeholder="0" value={item.qtd} onChange={e => updateItem(item.id, 'qtd', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>CUSTO UNIT. (R$)</label>
+                <input type="number" placeholder="0,00" value={item.custo} onChange={e => updateItem(item.id, 'custo', e.target.value)} />
+              </div>
+              <div className="form-group">
+                <label>PREÇO VENDA (R$)</label>
+                <input type="number" value={item.preco} onChange={e => updateItem(item.id, 'preco', e.target.value)} />
+              </div>
             </div>
-            {sabores.map((s, i) => (
-              <input 
-                key={i}
-                type="text"
-                placeholder={`Sabor do item ${i + 1}`}
-                value={s}
-                onChange={e => handleSaborChange(i, e.target.value)}
-                style={{ height: 48, fontSize: 13 }}
-              />
-            ))}
-          </div>
-        )}
 
-        <div style={{ marginTop: 30, padding: '24px', background: '#09090b', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #1e1e22' }}>
-          <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#52525b' }}>INVESTIMENTO TOTAL</div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {qtd * custo}</div>
+            <div className="form-group" style={{ maxWidth: '50%' }}>
+               <label>PUFFS — obrigatório para novos modelos</label>
+               <input type="text" placeholder="Ex: 8.000 puffs..." value={item.puffs} onChange={e => updateItem(item.id, 'puffs', e.target.value)} />
+            </div>
+
+            {item.sabores.length > 0 && (
+              <div style={{ marginTop: 20, padding: 20, background: '#09090b', borderRadius: 12, border: '1px solid #1e1e22' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: '#52525b', marginBottom: 15 }}>SABORES DO ITEM {idx + 1}:</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                  {item.sabores.map((s, sIdx) => (
+                    <input key={sIdx} type="text" placeholder={`Sabor ${sIdx + 1}`} value={s} onChange={e => updateSabor(item.id, sIdx, e.target.value)} style={{ height: 40, fontSize: 12 }} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-          <button className="btn-primary" onClick={registrarCompra}>FINALIZAR COMPRA ✓</button>
+        ))}
+
+        <button className="btn-action" onClick={adicionarItem} style={{ width: 'fit-content', padding: '12px 24px' }}>
+          + Adicionar item
+        </button>
+
+        <div style={{ borderTop: '1px solid #18181b', paddingTop: 30, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <div className="form-group" style={{ width: 300, marginBottom: 0 }}>
+             <label>FRETE TOTAL (R$)</label>
+             <input type="number" placeholder="0,00" value={frete} onChange={e => setFrete(e.target.value)} />
+          </div>
+
+          <div className="ipad-card" style={{ width: 400, padding: 24, marginBottom: 0 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: '#52525b' }}>TOTAL DA COMPRA</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>R$ {fmt(totalCompra)}</div>
+            <div style={{ fontSize: 12, color: '#52525b', marginTop: 5 }}>
+              Você - <span style={{ color: 'var(--wp-yellow)' }}>R$ {fmt(porSocio)}</span> | Sócio - <span style={{ color: 'var(--wp-yellow)' }}>R$ {fmt(porSocio)}</span>
+            </div>
+          </div>
         </div>
+
+        <button 
+          className="btn-primary" 
+          disabled={loading}
+          onClick={salvarCompra}
+          style={{ 
+            height: 60, fontSize: 16, 
+            background: 'linear-gradient(90deg, #00d2ff 0%, #928dab 100%)', 
+            color: '#fff', marginTop: 20 
+          }}
+        >
+          {loading ? 'PROCESSANDO...' : 'Registrar compra ✓'}
+        </button>
+
       </div>
     </div>
   )
