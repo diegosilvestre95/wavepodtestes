@@ -8,6 +8,7 @@ export default function Login() {
   const navigate = useNavigate()
   const [userKey, setUserKey] = useState('')
   const [pass, setPass] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = (e) => {
@@ -79,6 +80,7 @@ export default function Login() {
                   placeholder="Ex: admin" 
                   value={userKey} 
                   onChange={e => setUserKey(e.target.value)}
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -90,8 +92,22 @@ export default function Login() {
                   placeholder="••••••••" 
                   value={pass} 
                   onChange={e => setPass(e.target.value)}
+                  autoComplete="current-password"
                   required
                 />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: '#64748b' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe} 
+                    onChange={e => setRememberMe(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: 'var(--wp-yellow)' }}
+                  />
+                  Lembrar de mim
+                </label>
+                <span style={{ fontSize: 13, color: 'var(--wp-yellow)', fontWeight: 700, cursor: 'pointer' }}>Esqueceu a senha?</span>
               </div>
 
               <button className="btn-login-glow" disabled={loading}>
