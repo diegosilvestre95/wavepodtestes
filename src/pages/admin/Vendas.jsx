@@ -112,8 +112,12 @@ export default function Vendas() {
           </div>
           <button className="btn-primary" onClick={registrar} style={{ 
             padding: '12px 24px',
-            background: 'linear-gradient(90deg, #00d2ff 0%, #928dab 100%)',
-            color: '#fff', fontWeight: 900, border: 'none', borderRadius: '12px'
+            background: 'var(--wp-yellow)',
+            color: '#000',
+            fontWeight: 900,
+            border: 'none',
+            borderRadius: '12px',
+            textTransform: 'uppercase'
           }}>FINALIZAR VENDA ✓</button>
         </div>
       </div>

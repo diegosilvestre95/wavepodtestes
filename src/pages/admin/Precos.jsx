@@ -60,8 +60,12 @@ export default function Precos() {
         </div>
         <button className="btn-primary" onClick={salvarModelos} style={{ 
           padding: '12px 32px',
-          background: 'linear-gradient(90deg, #00d2ff 0%, #928dab 100%)',
-          color: '#fff', fontWeight: 900, border: 'none', borderRadius: '12px'
+          background: 'var(--wp-yellow)',
+          color: '#000',
+          fontWeight: 900,
+          border: 'none',
+          borderRadius: '12px',
+          textTransform: 'uppercase'
         }}>SALVAR ALTERAÇÕES ✓</button>
       </div>
 

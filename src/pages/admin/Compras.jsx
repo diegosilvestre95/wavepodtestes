@@ -199,8 +199,8 @@ export default function Compras() {
           onClick={salvarCompra}
           style={{ 
             height: 56, fontSize: 13, fontWeight: 900,
-            background: 'linear-gradient(90deg, #00d2ff 0%, #928dab 100%)', 
-            color: '#fff', marginTop: 10, borderRadius: 12,
+            background: 'var(--wp-yellow)', 
+            color: '#000', marginTop: 10, borderRadius: 12,
             textTransform: 'uppercase', letterSpacing: '0.1em',
             border: 'none', cursor: 'pointer', width: '100%'
           }}
