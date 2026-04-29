@@ -67,30 +67,33 @@ export default function Compras() {
         if (!item.modelo || !item.qtd || item.sabores.some(s => !s)) {
           throw new Error(`Preencha todos os dados do modelo ${item.modelo || ''}`)
         }
+
+        // Processa cada sabor individualmente (Sincronizado com Schema Real)
         for (const s of item.sabores) {
           const { data: p } = await sb.from('produtos').select('*').eq('nome', item.modelo).eq('sabor', s).single()
+
           if (p) {
             await sb.from('produtos').update({ 
               quantidade: p.quantidade + 1,
-              custo_unitario: parseFloat(item.custo),
-              preco_venda: parseFloat(item.preco),
-              puffs: item.puffs
+              custo: parseFloat(item.custo) // Nome conforme Schema: custo
             }).eq('id', p.id)
           } else {
             await sb.from('produtos').insert({
               nome: item.modelo,
               sabor: s,
               quantidade: 1,
-              custo_unitario: item.custo,
-              preco_venda: item.preco,
-              puffs: item.puffs
+              custo: item.custo
             })
           }
         }
+
+        // Registra a transação em 'compras' (Colunas: nome, quantidade, custo, frete, sabor)
         await sb.from('compras').insert({
-          produto_nome: item.modelo,
+          nome: item.modelo,
           quantidade: item.qtd,
-          investimento_total: (item.qtd * item.custo) + (parseFloat(frete) / itens.length)
+          custo: parseFloat(item.custo),
+          frete: (parseFloat(frete) / itens.length),
+          sabor: item.sabores.join(', ')
         })
       }
       toast('Compra registrada com sucesso!', '📥')

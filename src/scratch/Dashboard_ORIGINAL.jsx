@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+﻿import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
 
@@ -10,7 +10,7 @@ export default function Dashboard() {
 
   const carregarDados = async () => {
     setLoading(true)
-    // Busca dados para o cálculo financeiro
+    // Busca dados para o c├ílculo financeiro
     const { data: v } = await sb.from('vendas').select('*')
     const { data: c } = await sb.from('compras').select('*')
     const { data: p } = await sb.from('pedidos').select('*')
@@ -23,19 +23,15 @@ export default function Dashboard() {
 
   useEffect(() => { carregarDados() }, [])
 
-  // 🧮 LÓGICA ERP ASSIMILADA (Sincronizada com o Mapa da Mina)
+  // ­ƒº« L├ôGICA ERP CORRIGIDA (Sincronizada com Pedidos Confirmados)
   const stats = useMemo(() => {
-    // 1. Investimento Total (Compras: (custo * qtd) + frete)
-    const investido = compras.reduce((a, b) => {
-      const subtotal = (parseFloat(b.custo || 0) * parseInt(b.quantidade || 0))
-      const freteItem = parseFloat(b.frete || 0)
-      return a + subtotal + freteItem
-    }, 0)
+    // 1. Investimento Total (Compras)
+    const investido = compras.reduce((a, b) => a + parseFloat(b.investimento_total || 0), 0)
 
-    // 2. Faturamento de Vendas Manuais (Tabela vendas: preco_venda * quantidade)
+    // 2. Faturamento de Vendas Manuais
     const fatVendas = vendas.reduce((a, b) => a + (parseFloat(b.preco_venda || 0) * parseInt(b.quantidade || 0)), 0)
 
-    // 3. Faturamento de Pedidos Confirmados
+    // 3. Faturamento de Pedidos Confirmados (ESSA ERA A PE├çA QUE FALTA)
     const fatPedidos = pedidos
       .filter(p => p.status === 'Confirmado')
       .reduce((a, b) => a + parseFloat(b.total || 0), 0)
@@ -55,8 +51,8 @@ export default function Dashboard() {
       
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
          <div>
-            <h1 style={{ fontSize: 32, fontWeight: 800 }}>Visão Geral ERP</h1>
-            <p style={{ color: '#666', fontSize: 14 }}>Gestão unificada de vendas, pedidos e dividendos societários.</p>
+            <h1 style={{ fontSize: 32, fontWeight: 800 }}>Vis├úo Geral ERP</h1>
+            <p style={{ color: '#666', fontSize: 14 }}>Gest├úo unificada de vendas, pedidos e dividendos societ├írios.</p>
          </div>
          <button className="btn-action" onClick={carregarDados}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
@@ -79,7 +75,7 @@ export default function Dashboard() {
          </div>
 
          <div className="ipad-card" style={{ borderLeft: `4px solid ${stats.lucroLiquido >= 0 ? '#10b981' : '#ef4444'}` }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: '#666', marginBottom: 10 }}>LUCRO LÍQUIDO</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: '#666', marginBottom: 10 }}>LUCRO L├ìQUIDO</div>
             <div style={{ fontSize: 28, fontWeight: 800, color: stats.lucroLiquido >= 0 ? '#10b981' : '#ef4444' }}>
                R$ {fmt(stats.lucroLiquido)}
             </div>
@@ -87,9 +83,9 @@ export default function Dashboard() {
          </div>
 
          <div className="ipad-card" style={{ background: 'linear-gradient(145deg, #18181b 0%, #1e1e22 100%)', border: '1px solid rgba(255,215,0,0.2)' }}>
-            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--wp-yellow)', marginBottom: 10 }}>LUCRO POR SÓCIO (50%)</div>
+            <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--wp-yellow)', marginBottom: 10 }}>LUCRO POR S├ôCIO (50%)</div>
             <div style={{ fontSize: 28, fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {fmt(stats.porSocio)}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,215,0,0.5)', marginTop: 8 }}>Cálculo societário automático</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,215,0,0.5)', marginTop: 8 }}>C├ílculo societ├írio autom├ítico</div>
          </div>
 
       </div>
@@ -110,7 +106,7 @@ export default function Dashboard() {
                ))}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#444', fontWeight: 800 }}>
-               <span>ANTIGOS</span><span>HISTÓRICO DE CONFIRMADOS</span><span>RECENTES</span>
+               <span>ANTIGOS</span><span>HIST├ôRICO DE CONFIRMADOS</span><span>RECENTES</span>
             </div>
          </div>
 
@@ -119,7 +115,7 @@ export default function Dashboard() {
             <table className="table-ipad" style={{ fontSize: 12 }}>
                <thead>
                   <tr>
-                     <th>OPERAÇÃO</th>
+                     <th>OPERA├ç├âO</th>
                      <th>VALOR</th>
                      <th>STATUS</th>
                   </tr>

@@ -77,8 +77,8 @@ export default function Estoque() {
                     <td style={{ paddingLeft: 30, fontWeight: 700, color: '#fff' }}>{i.nome}</td>
                     <td style={{ color: '#52525b' }}>{i.sabor}</td>
                     <td style={{ fontWeight: 800 }}>{i.quantidade} un</td>
-                    <td>R$ {fmt(i.custo_unitario)}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--wp-yellow)' }}>R$ {fmt(i.quantidade * i.custo_unitario)}</td>
+                    <td>R$ {fmt(i.custo)}</td>
+                    <td style={{ fontWeight: 700, color: 'var(--wp-yellow)' }}>R$ {fmt(i.quantidade * i.custo)}</td>
                     <td style={{ paddingRight: 30 }}>
                       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <div className="status-pill" style={{ color: st.color }}>

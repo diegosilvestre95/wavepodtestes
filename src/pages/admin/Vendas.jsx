@@ -48,7 +48,8 @@ export default function Vendas() {
       produto_id: sel,
       quantidade: qty,
       preco_venda: preco,
-      lucro: (preco - p.custo_unitario) * qty
+      nome_produto: p.nome,
+      sabor_produto: p.sabor
     })
 
     toast('Venda registrada com sucesso!', '💸')
