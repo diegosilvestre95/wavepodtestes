@@ -133,9 +133,12 @@ export function AppProvider({ children }) {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback((username, senha) => {
-    const user = USERS[username]
+    // Busca a chave original ignorando maiúsculas/minúsculas
+    const keyOriginal = Object.keys(USERS).find(k => k.toLowerCase() === username.toLowerCase())
+    const user = keyOriginal ? USERS[keyOriginal] : null
+
     if (user && user.senha === senha) {
-      const u = { login: username, ...user }
+      const u = { login: keyOriginal, ...user }
       localStorage.setItem('wvpod_user', JSON.stringify(u))
       setCurrentUser(u)
       iniciarRealtime()
