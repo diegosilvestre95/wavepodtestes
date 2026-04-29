@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
 import { useApp } from '../../context/AppContext'
+import { WA_DIEGO, WA_LUCAS } from '../../lib/config'
 
 export default function Pedidos() {
   const { toast } = useApp()
@@ -35,6 +36,10 @@ export default function Pedidos() {
     }
   }
 
+  const msgWA = (p) => {
+    return encodeURIComponent(`Olá ${p.cliente_nome}, vimos seu pedido de R$ ${fmt(p.total)} no WavePod. Como podemos ajudar?`)
+  }
+
   if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SINCRONIZANDO FILA DE PEDIDOS...</div>
 
   return (
@@ -60,11 +65,11 @@ export default function Pedidos() {
         <table className="data-table" style={{ border: 'none' }}>
           <thead>
             <tr>
-              <th>ID do Pedido</th>
-              <th>Cliente / Nó</th>
+              <th>ID</th>
+              <th>Cliente / Contato</th>
               <th>Volume Financeiro</th>
-              <th>Status Atual</th>
-              <th style={{ textAlign: 'right' }}>Resolução</th>
+              <th>Status</th>
+              <th style={{ textAlign: 'right' }}>Ações de Resolução</th>
             </tr>
           </thead>
           <tbody>
@@ -75,7 +80,17 @@ export default function Pedidos() {
                 </td>
                 <td>
                   <div style={{ fontWeight: 700 }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{new Date(p.created_at).toLocaleDateString()}</div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                     <a href={`https://wa.me/${p.cliente_whatsapp}`} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#166534', textDecoration: 'none', fontWeight: 800, background: '#DCFCE7', padding: '2px 6px', borderRadius: 4 }}>
+                        CLIENTE 📲
+                     </a>
+                     <a href={`https://wa.me/${WA_DIEGO}?text=${msgWA(p)}`} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#1E40AF', textDecoration: 'none', fontWeight: 800, background: '#DBEAFE', padding: '2px 6px', borderRadius: 4 }}>
+                        DIEGO 👷
+                     </a>
+                     <a href={`https://wa.me/${WA_LUCAS}?text=${msgWA(p)}`} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: '#1E40AF', textDecoration: 'none', fontWeight: 800, background: '#DBEAFE', padding: '2px 6px', borderRadius: 4 }}>
+                        LUCAS 📦
+                     </a>
+                  </div>
                 </td>
                 <td style={{ fontWeight: 800, fontSize: 14 }}>R$ {fmt(p.total)}</td>
                 <td>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import { sb } from '../lib/supabase'
 import Dashboard from './admin/Dashboard'
 import Vendas    from './admin/Vendas'
 import Compras   from './admin/Compras'
@@ -19,13 +20,29 @@ const MENU = [
 ]
 
 export default function Admin() {
-  const { currentUser, logout } = useApp()
+  const { currentUser, logout, toast } = useApp()
   const navigate = useNavigate()
   const [active, setActive] = useState('dashboard')
+  const [iaAtiva, setIaAtiva] = useState(true)
 
   useEffect(() => {
     if (!currentUser) navigate('/login')
+    carregarConfig()
   }, [currentUser, navigate])
+
+  const carregarConfig = async () => {
+    const { data } = await sb.from('config').select('*').eq('chave', 'ia_ativa').single()
+    if (data) setIaAtiva(data.valor === 'true')
+  }
+
+  const toggleIA = async () => {
+    const novoEstado = !iaAtiva
+    const { error } = await sb.from('config').upsert({ chave: 'ia_ativa', valor: String(novoEstado) })
+    if (!error) {
+      setIaAtiva(novoEstado)
+      toast(`IA ${novoEstado ? 'Ativada' : 'Pausada'}`, novoEstado ? '🤖' : '⏸️')
+    }
+  }
 
   const RenderPage = { 
     dashboard: Dashboard, vendas: Vendas, compras: Compras, 
@@ -90,6 +107,23 @@ export default function Admin() {
            </div>
 
            <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+              {/* OMNICHANNEL IA STATUS */}
+              <div 
+                onClick={toggleIA}
+                style={{ 
+                  display: 'flex', alignItems: 'center', gap: 8, 
+                  background: iaAtiva ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                  padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
+                  border: `1px solid ${iaAtiva ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                  transition: '0.2s'
+                }}
+              >
+                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: iaAtiva ? '#22c55e' : '#ef4444', boxShadow: iaAtiva ? '0 0 8px #22c55e' : 'none' }}></div>
+                 <span style={{ fontSize: 10, fontWeight: 800, color: iaAtiva ? '#166534' : '#991b1b', textTransform: 'uppercase' }}>
+                    IA {iaAtiva ? 'Ativa' : 'Pausada'}
+                 </span>
+              </div>
+
               <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                  <span style={{ cursor: 'pointer', fontSize: 14 }}>🔔</span>
                  <div style={{ width: 1, height: 20, background: 'var(--border)' }}></div>
