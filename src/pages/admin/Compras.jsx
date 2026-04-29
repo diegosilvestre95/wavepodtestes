@@ -31,7 +31,7 @@ export default function Compras() {
         data: new Date().toISOString()
       }])
       await sb.from('produtos').update({ 
-        quantidade: p.quantidade + parseInt(form.quantidade), 
+        quantidade: (p.quantidade || 0) + parseInt(form.quantidade), 
         custo: parseFloat(form.custo) 
       }).eq('id', p.id)
       setForm({ produtoId: '', quantidade: 1, custo: '', frete: 0 }); carregarDados()
@@ -39,49 +39,69 @@ export default function Compras() {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 32, alignItems: 'start' }}>
-      <div className="card">
-        <h3 style={{ marginBottom: 24 }}>Entrada de Estoque</h3>
-        <form onSubmit={handleCompra}>
-          <div style={{ marginBottom: 16 }}>
-            <label className="stat-label">Produto</label>
-            <select className="input-field" value={form.produtoId} onChange={e => setForm({...form, produtoId: e.target.value})}>
-              <option value="">— Selecione —</option>
-              {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} {p.sabor}</option>)}
-            </select>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-            <div><label className="stat-label">Qtd</label><input type="number" className="input-field" value={form.quantidade} onChange={e => setForm({...form, quantidade: e.target.value})} /></div>
-            <div><label className="stat-label">Custo Un.</label><input type="number" step="0.01" className="input-field" value={form.custo} onChange={e => setForm({...form, custo: e.target.value})} /></div>
-          </div>
-          <div style={{ marginBottom: 24 }}>
-            <label className="stat-label">Frete Total (R$)</label>
-            <input type="number" step="0.01" className="input-field" value={form.frete} onChange={e => setForm({...form, frete: e.target.value})} />
-          </div>
-          <button className="btn btn-primary" style={{ width: '100%', background: '#3b82f6', color: '#fff' }} disabled={loading}>
-            {loading ? 'REGISTRANDO...' : 'CONFIRMAR ENTRADA'}
-          </button>
-        </form>
+    <div>
+      <div style={{ marginBottom: 48 }}>
+        <h1 style={{ fontSize: 32, fontWeight: 900, color: '#FFF' }}>Inbound <span style={{ color: 'var(--wp-yellow)' }}>Logistics</span></h1>
+        <p style={{ color: 'var(--text-dim)', fontSize: 14 }}>Inventory acquisition and cost exposure nodes.</p>
       </div>
 
-      <div className="card">
-        <h3 style={{ marginBottom: 24 }}>Aquisições</h3>
-        <table className="table-container">
-          <thead>
-            <tr><th>Produto</th><th>Qtd</th><th>Unitário</th><th>Frete</th><th>Total</th></tr>
-          </thead>
-          <tbody>
-            {compras.slice(0, 15).map(c => (
-              <tr key={c.id}>
-                <td><strong>{c.nome}</strong> <small style={{color:'var(--text-muted)'}}>{c.sabor}</small></td>
-                <td>{c.quantidade} un</td>
-                <td>R$ {fmt(c.custo)}</td>
-                <td>R$ {fmt(c.frete)}</td>
-                <td style={{ fontWeight: 800, color: '#3b82f6' }}>R$ {fmt((c.custo * c.quantidade) + c.frete)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr', gap: 32, alignItems: 'start' }}>
+        
+        {/* 📥 INBOUND NODE */}
+        <div className="premium-card gold-edge">
+          <div className="stat-title" style={{ marginBottom: 32 }}>Acquisition Entry</div>
+          <form onSubmit={handleCompra}>
+            <div style={{ marginBottom: 20 }}>
+              <label className="stat-title" style={{ fontSize: 10 }}>Resource Model</label>
+              <select className="input-premium" value={form.produtoId} onChange={e => setForm({...form, produtoId: e.target.value})}>
+                <option value="">— SELECT_RESOURCE —</option>
+                {produtos.map(p => <option key={p.id} value={p.id} style={{background:'#18181b'}}>{p.nome} {p.sabor}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+              <div>
+                <label className="stat-title" style={{ fontSize: 10 }}>Volume</label>
+                <input type="number" className="input-premium" value={form.quantidade} onChange={e => setForm({...form, quantidade: e.target.value})} />
+              </div>
+              <div>
+                <label className="stat-title" style={{ fontSize: 10 }}>Unit Cost (R$)</label>
+                <input type="number" step="0.01" className="input-premium" value={form.custo} onChange={e => setForm({...form, custo: e.target.value})} />
+              </div>
+            </div>
+            <div style={{ marginBottom: 32 }}>
+              <label className="stat-title" style={{ fontSize: 10 }}>Freight Exposure (R$)</label>
+              <input type="number" step="0.01" className="input-premium" value={form.frete} onChange={e => setForm({...form, frete: e.target.value})} />
+            </div>
+            <button className="btn-ultimate" style={{ width: '100%', height: 56, background: '#FFF', color: '#000' }} disabled={loading}>
+              {loading ? 'PROCESSING...' : 'CONFIRM_ACQUISITION'}
+            </button>
+          </form>
+        </div>
+
+        {/* 📊 LOG NODE */}
+        <div className="premium-card">
+          <div className="stat-title" style={{ marginBottom: 32 }}>Recent Inbound Batches</div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="wp-surface">
+              <thead>
+                <tr><th>Resource</th><th>Batch</th><th>Exposure</th></tr>
+              </thead>
+              <tbody>
+                {compras.slice(0, 10).map(c => (
+                  <tr key={c.id}>
+                    <td>
+                      <div style={{ fontWeight: 700 }}>{c.nome}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-dark)' }}>{c.sabor}</div>
+                    </td>
+                    <td style={{ fontWeight: 600 }}>{c.quantidade} <span style={{fontSize:10, color:'var(--text-dark)'}}>UN</span></td>
+                    <td style={{ fontWeight: 800 }}>R$ {fmt((c.custo * c.quantidade) + c.frete)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   )

@@ -10,12 +10,12 @@ import Pedidos   from './admin/Pedidos'
 import Logo      from '../components/Logo'
 
 const MENU = [
-  { id: 'dashboard', label: 'Painel Geral', icon: '📊' },
-  { id: 'pedidos',   label: 'Pedidos Online', icon: '🛒' },
-  { id: 'vendas',    label: 'Vendas Manuais', icon: '💰' },
-  { id: 'compras',   label: 'Registrar Compras', icon: '📥' },
-  { id: 'estoque',   label: 'Estoque Real', icon: '📦' },
-  { id: 'precos',    label: 'Tabela de Preços', icon: '🏷️' },
+  { id: 'dashboard', label: 'Overview', icon: '📊' },
+  { id: 'pedidos',   label: 'Requests', icon: '🛒' },
+  { id: 'vendas',    label: 'Terminal', icon: '💰' },
+  { id: 'compras',   label: 'Inbound', icon: '📥' },
+  { id: 'estoque',   label: 'Inventory', icon: '📦' },
+  { id: 'precos',    label: 'Config', icon: '⚙️' },
 ]
 
 export default function Admin() {
@@ -33,76 +33,81 @@ export default function Admin() {
   }[active] || Dashboard
 
   return (
-    <div className="app-container">
-      {/* 🖥️ SIDEBAR ESTRUTURAL */}
+    <div className="app-shell">
+      {/* 🔮 THE OBSIDIAN SIDEBAR */}
       <aside className="sidebar">
-        <div style={{ padding: '0 16px', marginBottom: 40 }}>
-           <Logo size={40} light />
+        <div style={{ marginBottom: 60, display: 'flex', justifyContent: 'center' }}>
+           <Logo size={48} showText={false} />
         </div>
 
         <nav style={{ flex: 1 }}>
           {MENU.map(item => (
             <div 
               key={item.id} 
-              className={`nav-item ${active === item.id ? 'active' : ''}`}
+              className={`nav-link ${active === item.id ? 'active' : ''}`}
               onClick={() => setActive(item.id)}
             >
-              <span style={{ fontSize: 18 }}>{item.icon}</span>
+              <span style={{ fontSize: 20 }}>{item.icon}</span>
               <span>{item.label}</span>
             </div>
           ))}
         </nav>
 
-        <div className="nav-item" onClick={logout} style={{ marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: 24, borderRadius: 0 }}>
-           <span>🚪</span>
-           <span>Sair do Sistema</span>
+        {/* PROFILE SECTION — PREMIUM FINISH */}
+        <div style={{ 
+          marginTop: 'auto', 
+          background: 'rgba(255,255,255,0.03)', 
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)', 
+          padding: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 12
+        }}>
+           <div style={{ 
+             width: 40, height: 40, borderRadius: 10, 
+             background: 'var(--wp-yellow)', color: '#000', 
+             display: 'flex', alignItems: 'center', justifyContent: 'center', 
+             fontWeight: 900, fontSize: 14, boxShadow: 'var(--glow-gold)' 
+           }}>
+              {currentUser?.nome?.[0] || 'A'}
+           </div>
+           <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#FFF' }}>{currentUser?.nome}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-dark)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Operator</div>
+           </div>
+           <button onClick={logout} style={{ background: 'transparent', border: 'none', color: 'var(--text-dark)', cursor: 'pointer', fontSize: 18, transition: '0.3s' }} onMouseOver={e => e.target.style.color='#FFF'} onMouseOut={e => e.target.style.color='var(--text-dark)'}>
+              🚪
+           </button>
         </div>
       </aside>
 
-      {/* 🚀 PALCO PRINCIPAL */}
-      <main className="main-stage">
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
-           <div>
-              <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                WavePod ERP / {MENU.find(m => m.id === active)?.label}
+      {/* 🚀 THE STAGE */}
+      <main className="stage">
+        <header className="glass-header">
+           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--wp-yellow)', boxShadow: 'var(--glow-gold)' }}></div>
+              <h2 style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-dark)' }}>
+                 WavePod Systems / {MENU.find(m => m.id === active)?.label}
               </h2>
            </div>
 
-           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ textAlign: 'right' }} className="mobile-hidden">
-                 <div style={{ fontSize: 14, fontWeight: 700 }}>{currentUser?.nome}</div>
-                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{currentUser?.role?.toUpperCase()}</div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+              <div style={{ display: 'flex', gap: 20 }}>
+                 <span style={{ cursor: 'pointer', color: 'var(--text-dim)' }}>🔍</span>
+                 <span style={{ cursor: 'pointer', color: 'var(--text-dim)' }}>🔔</span>
               </div>
-              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--wp-yellow)', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
-                 {currentUser?.nome?.[0] || 'A'}
+              <div style={{ width: 1, height: 24, background: 'var(--border)' }}></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                 <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--text-dark)' }}>VER. 10.0</div>
               </div>
            </div>
         </header>
 
-        <section style={{ animation: 'fadeIn 0.4s ease-out' }}>
+        <section style={{ maxWidth: 1400, margin: '0 auto' }}>
            <RenderPage />
         </section>
       </main>
-
-      {/* 📱 MOBILE NAVIGATION */}
-      <nav className="bottom-nav mobile-only">
-        {MENU.slice(0, 5).map(item => (
-          <div 
-            key={item.id} 
-            className={`bottom-item ${active === item.id ? 'active' : ''}`}
-            onClick={() => setActive(item.id)}
-            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: active === item.id ? 'var(--wp-yellow)' : 'var(--text-muted)' }}
-          >
-            <span style={{ fontSize: 20 }}>{item.icon}</span>
-            <span style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', marginTop: 4 }}>{item.id}</span>
-          </div>
-        ))}
-      </nav>
-
-      <style>{`
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .mobile-hidden { display: none; } }
-      `}</style>
     </div>
   )
 }

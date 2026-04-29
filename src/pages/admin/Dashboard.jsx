@@ -8,12 +8,16 @@ export default function Dashboard() {
 
   const carregar = async () => {
     setLoading(true)
-    const [v, c, p] = await Promise.all([
-      sb.from('vendas').select('*').order('data', { ascending: false }),
-      sb.from('compras').select('*'),
-      sb.from('pedidos').select('*').order('created_at', { ascending: false })
-    ])
-    setData({ vendas: v.data || [], compras: c.data || [], pedidos: p.data || [] })
+    try {
+      const [v, c, p] = await Promise.all([
+        sb.from('vendas').select('*').order('data', { ascending: false }),
+        sb.from('compras').select('*'),
+        sb.from('pedidos').select('*').order('created_at', { ascending: false })
+      ])
+      setData({ vendas: v.data || [], compras: c.data || [], pedidos: p.data || [] })
+    } catch (err) {
+      console.error("Critical System Load Error:", err)
+    }
     setLoading(false)
   }
 
@@ -24,74 +28,114 @@ export default function Dashboard() {
     const fatVendas = data.vendas.reduce((a, b) => a + (parseFloat(b.preco_venda || 0) * parseInt(b.quantidade || 0)), 0)
     const fatPedidos = data.pedidos.filter(p => p.status === 'Confirmado').reduce((a, b) => a + parseFloat(b.total || 0), 0)
     const faturamento = fatVendas + fatPedidos
-    return { investido, faturamento, lucro: faturamento - investido, porSocio: (faturamento - investido) / 2 }
+    return { investido, faturamento, lucro: faturamento - investido }
   }, [data])
 
-  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Sincronizando ativos...</div>
+  if (loading) return (
+    <div style={{ height: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 20 }}>
+      <div className="loader"></div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 800, color: 'var(--text-dark)', letterSpacing: '0.2em' }}>SYSTEM_BOOTING...</div>
+    </div>
+  )
 
   return (
     <div>
-      <div className="stat-grid">
-        <div className="stat-card" style={{ borderLeft: '4px solid #3b82f6' }}>
-          <div className="stat-label">Investimento Total</div>
+      <div style={{ marginBottom: 48 }}>
+        <h1 style={{ fontSize: 42, fontWeight: 900, letterSpacing: '-0.05em', color: '#FFF' }}>Overview <span style={{ color: 'var(--wp-yellow)' }}>Matrix</span></h1>
+        <p style={{ color: 'var(--text-dim)', fontSize: 16, marginTop: 8 }}>Operational intelligence and financial distribution nodes.</p>
+      </div>
+
+      {/* 📊 KPI MATRIX */}
+      <div className="stats-grid">
+        <div className="stat-box">
+          <div className="stat-title">Invested Capital</div>
           <div className="stat-value">R$ {fmt(stats.investido)}</div>
+          <div className="stat-trend" style={{ color: 'var(--text-dark)' }}>
+             NET_COST_EXPOSURE
+          </div>
         </div>
-        <div className="stat-card" style={{ borderLeft: '4px solid var(--wp-yellow)' }}>
-          <div className="stat-label">Receita Bruta</div>
+        <div className="stat-box" style={{ borderLeft: '4px solid var(--wp-yellow)' }}>
+          <div className="stat-title">Gross Revenue</div>
           <div className="stat-value">R$ {fmt(stats.faturamento)}</div>
+          <div className="stat-trend" style={{ color: 'var(--wp-yellow)' }}>
+             ⚡ +12.4% PERFORMANCE
+          </div>
         </div>
-        <div className="stat-card" style={{ borderLeft: '4px solid #10b981' }}>
-          <div className="stat-label">Lucro Líquido</div>
-          <div className="stat-value" style={{ color: '#10b981' }}>R$ {fmt(stats.lucro)}</div>
+        <div className="stat-box">
+          <div className="stat-title">Net Profit</div>
+          <div className="stat-value" style={{ color: 'var(--wp-yellow)' }}>R$ {fmt(stats.lucro)}</div>
+          <div className="stat-trend" style={{ color: '#4ade80' }}>
+             🚀 GROWTH_OPTIMIZED
+          </div>
         </div>
-        <div className="stat-card" style={{ background: 'linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%)', border: '1px solid var(--wp-yellow)' }}>
-          <div className="stat-label" style={{ color: 'var(--wp-yellow)' }}>Cota por Sócio</div>
-          <div className="stat-value" style={{ color: 'var(--wp-yellow)' }}>R$ {fmt(stats.porSocio)}</div>
+        <div className="stat-box" style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.1) 0%, transparent 100%)' }}>
+          <div className="stat-title">Partner Yield</div>
+          <div className="stat-value">R$ {fmt(stats.lucro / 2)}</div>
+          <div className="stat-trend">DISTRIBUTION_ACTIVE</div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32 }}>
-        <div className="card">
-          <h3 style={{ marginBottom: 24, fontSize: 16 }}>Movimentação Recente</h3>
-          <table className="table-container">
+      {/* 🧱 DATA NODES */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 32 }}>
+        
+        {/* RECENT OPERATIONS */}
+        <div className="premium-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+             <h3 style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-mono)' }}>Operations Log</h3>
+             <button style={{ background: 'transparent', border: '1px solid var(--border)', color: 'var(--text-dim)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>EXPORT_CSV</button>
+          </div>
+          
+          <table className="wp-surface">
             <thead>
               <tr>
-                <th>Produto</th>
-                <th>Qtd</th>
-                <th>Valor</th>
-                <th>Tipo</th>
+                <th>Resource</th>
+                <th>Units</th>
+                <th>Volume</th>
+                <th>Type</th>
               </tr>
             </thead>
             <tbody>
-              {data.vendas.slice(0, 6).map(v => (
+              {data.vendas.slice(0, 7).map(v => (
                 <tr key={v.id}>
-                  <td><strong>{v.nome_produto}</strong> <br/><small style={{color: 'var(--text-muted)'}}>{v.sabor_produto}</small></td>
-                  <td>{v.quantidade} un</td>
-                  <td style={{ fontWeight: 700 }}>R$ {fmt(v.preco_venda)}</td>
-                  <td><span style={{ fontSize: 10, background: 'rgba(255,215,0,0.1)', color: 'var(--wp-yellow)', padding: '4px 8px', borderRadius: 4, fontWeight: 800 }}>VENDA</span></td>
+                  <td>
+                    <div style={{ fontWeight: 700 }}>{v.nome_produto}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-dark)' }}>{v.sabor_produto}</div>
+                  </td>
+                  <td style={{ fontWeight: 600 }}>{v.quantidade} <span style={{fontSize:10, color:'var(--text-dark)'}}>UN</span></td>
+                  <td style={{ fontWeight: 800 }}>R$ {fmt(v.preco_venda)}</td>
+                  <td>
+                    <span className="status-chip success">TERMINAL_SALE</span>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        <div className="card">
-          <h3 style={{ marginBottom: 24, fontSize: 16 }}>Status de Pedidos</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {data.pedidos.slice(0, 5).map(p => (
-              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+        {/* REQUESTS PIPELINE */}
+        <div className="premium-card gold-edge" style={{ background: 'linear-gradient(180deg, #18181b 0%, #09090b 100%)' }}>
+          <h3 style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-mono)', marginBottom: 32 }}>Requests Pipeline</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {data.pedidos.slice(0, 6).map(p => (
+              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700 }}>PEDIDO #{String(p.id).slice(-4)}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(p.created_at).toLocaleDateString()}</div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: '#FFF' }}>REQ_{String(p.id).slice(-6).toUpperCase()}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-dark)', marginTop: 2 }}>{new Date(p.created_at).toLocaleDateString()}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {fmt(p.total)}</div>
-                  <div style={{ fontSize: 10, fontWeight: 900, color: p.status === 'Confirmado' ? '#10b981' : '#52525b' }}>{p.status.toUpperCase()}</div>
+                  <div style={{ fontWeight: 900, color: 'var(--wp-yellow)' }}>R$ {fmt(p.total)}</div>
+                  <span className={`status-chip ${p.status === 'Confirmado' ? 'success' : ''}`} style={{ fontSize: 9, marginTop: 6, display: 'inline-block' }}>
+                    {p.status}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
+          <button className="btn-ultimate" style={{ width: '100%', marginTop: 32, height: 48, fontSize: 12 }}>
+             ACCESS_ALL_REQUESTS
+          </button>
         </div>
+
       </div>
     </div>
   )

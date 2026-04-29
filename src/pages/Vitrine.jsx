@@ -42,22 +42,21 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
     <div className="pod-card">
       <div className="pod-visual">
         <div className="pod-emoji-big">{cat.emoji}</div>
-        <div className={`pod-tag${!temEstoque ? ' esgotado-tag' : ''}`}>
-          {temEstoque ? 'LIVE STOCK' : 'OUT OF STOCK'}
+        <div className="pod-tag" style={{ background: temEstoque ? 'var(--wp-yellow)' : '#52525b', color: '#000' }}>
+          {temEstoque ? 'ACTIVE_STOCK' : 'DEPLETED'}
         </div>
       </div>
 
       <div className="pod-card-body">
+        <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>{cat.linha} Edition</div>
         <div className="pod-name">{cat.nome}</div>
-        <div style={{ color: 'var(--wp-silver)', fontSize: 13, marginBottom: 12, opacity: 0.6 }}>
-          Premium Edition · {cat.desc}
-        </div>
+        <div style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 24 }}>{cat.desc}</div>
         
         <div className="pod-price">R$ {cat.preco.toFixed(2).replace('.', ',')}</div>
 
-        <div style={{ marginTop: 24 }}>
-          <span className="flavor-label">Disponibilidade de Sabores</span>
-          <div className="flavor-chips">
+        <div style={{ marginTop: 32 }}>
+          <span className="flavor-label">Select Flavor Node</span>
+          <div className="flavor-chips" style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
             {itens.map(p => (
               <div key={p.id} 
                 className={`fchip${selecionados[p.sabor] ? ' sel' : ''}`} 
@@ -66,16 +65,16 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
                 {p.sabor}
               </div>
             ))}
-            {!temEstoque && <div className="fchip" style={{ opacity: 0.5 }}>Esgotado</div>}
+            {!temEstoque && <div className="fchip" style={{ opacity: 0.3, cursor: 'not-allowed' }}>Unavailabe</div>}
           </div>
         </div>
 
-        <div className="pod-action" style={{ marginTop: 32 }}>
-          <button className="btn-primary" style={{ width: '100%', height: '56px', fontSize: '15px' }} 
+        <div style={{ marginTop: 40 }}>
+          <button className="btn-ultimate" style={{ width: '100%', height: '60px' }} 
             disabled={countSel === 0} 
             onClick={handleAddToCart}
           >
-            {countSel === 0 ? 'SELECIONE O SABOR' : 'ADICIONAR AO CARRINHO'}
+            {countSel === 0 ? 'CONFIGURE FLAVOR' : `ADD ${countSel} TO ORDER`}
           </button>
         </div>
       </div>
@@ -88,15 +87,30 @@ function CartBar({ cart, onCheckout }) {
   const count = cart.reduce((a, i) => a + i.qty, 0)
   if (count === 0) return null
   return (
-    <div className="cart-section" style={{ position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)', zIndex: 1100, width: 'auto' }}>
-      <div style={{ background: 'var(--wp-gray-dark)', border: '1px solid var(--wp-yellow)', borderRadius: '24px', padding: '16px 32px', boxShadow: '0 20px 50px rgba(0,0,0,0.6)', display: 'flex', gap: 40, alignItems: 'center' }}>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--wp-yellow)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Meu Pedido</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{count} produto{count !== 1 ? 's' : ''}</div>
+    <div style={{ position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)', zIndex: 1100, width: '90%', maxWidth: 600 }}>
+      <div style={{ 
+        background: 'rgba(9,9,11,0.8)', 
+        backdropFilter: 'blur(24px)', 
+        border: '1px solid var(--border-gold)', 
+        borderRadius: '30px', 
+        padding: '20px 40px', 
+        boxShadow: '0 30px 60px rgba(0,0,0,0.8)', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center' 
+      }}>
+        <div style={{ display: 'flex', gap: 32 }}>
+           <div>
+              <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-dark)', textTransform: 'uppercase' }}>Items</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: '#FFF' }}>{count}</div>
+           </div>
+           <div>
+              <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-dark)', textTransform: 'uppercase' }}>Subtotal</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {total.toFixed(2).replace('.', ',')}</div>
+           </div>
         </div>
-        <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', fontFamily: 'var(--font-display)' }}>R$ {total.toFixed(2).replace('.', ',')}</div>
-        <button className="btn-primary" style={{ padding: '12px 24px', borderRadius: '14px' }} onClick={onCheckout}>
-          CHECKOUT →
+        <button className="btn-ultimate" style={{ padding: '12px 28px', fontSize: 12 }} onClick={onCheckout}>
+          INIT_ORDER_FLOW →
         </button>
       </div>
     </div>
@@ -111,46 +125,49 @@ export default function Vitrine() {
     document.documentElement.setAttribute('data-theme', 'dark')
   }, [])
 
-  const sidebarCats = useMemo(() =>
-    catalogo.map(cat => ({
-      ...cat,
-      disponiveis: produtosDB.filter(p => p.nome === cat.nome && (p.quantidade || 0) > 0).length,
-    })),
-    [catalogo, produtosDB]
-  )
-
   const scrollTo = (linha) => {
-    document.getElementById(`pc-${linha}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    const el = document.getElementById(`pc-${linha}`)
+    if (el) {
+      const offset = 120
+      const bodyRect = document.body.getBoundingClientRect().top
+      const elementRect = el.getBoundingClientRect().top
+      const elementPosition = elementRect - bodyRect
+      const offsetPosition = elementPosition - offset
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+    }
   }
 
   return (
-    <>
+    <div style={{ background: 'var(--bg-deep)', minHeight: '100vh' }}>
       <Header showAdminBtn />
 
       <div className="vitrine-shell">
         <aside className="vitrine-sidebar">
-          <div>
-            <div className="vsidebar-cat-title">Categorias</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
-              {sidebarCats.map((cat) => (
-                <div key={cat.linha} className="vsidebar-item" onClick={() => scrollTo(cat.linha)}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span>{cat.emoji}</span> {cat.nome}
+          <div style={{ flex: 1 }}>
+            <div className="vsidebar-cat-title">Catalogue Nodes</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 24 }}>
+              {catalogo.map((cat) => {
+                const count = produtosDB.filter(p => p.nome === cat.nome && (p.quantidade || 0) > 0).length
+                return (
+                  <div key={cat.linha} className="vsidebar-item" onClick={() => scrollTo(cat.linha)}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <span style={{ fontSize: 20 }}>{cat.emoji}</span> {cat.nome}
+                    </div>
+                    {count > 0 && <span className="vsidebar-badge">{count}</span>}
                   </div>
-                  {cat.disponiveis > 0 && <span className="vsidebar-badge">{cat.disponiveis}</span>}
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
           
-          <div style={{ marginTop: 'auto', borderTop: 'var(--border-glass)', paddingTop: 30 }}>
-            <div className="vsidebar-cat-title">Suporte</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 20 }}>
-              <a href={`https://wa.me/${WA_DIEGO}`} target="_blank" rel="noreferrer" style={{ color: '#fff', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-                 <div style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%' }}></div> Falar com Diego
+          <div style={{ marginTop: 40, padding: 24, background: 'rgba(255,255,255,0.02)', borderRadius: 20, border: '1px solid var(--border)' }}>
+            <div className="vsidebar-cat-title" style={{ marginBottom: 16 }}>Direct Access</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <a href={`https://wa.me/${WA_DIEGO}`} target="_blank" rel="noreferrer" style={{ color: 'var(--text-dim)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' }}></div> Diego_Ops
               </a>
-              <a href={`https://wa.me/${WA_LUCAS}`} target="_blank" rel="noreferrer" style={{ color: '#fff', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-                 <div style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%' }}></div> Falar com Lucas
+              <a href={`https://wa.me/${WA_LUCAS}`} target="_blank" rel="noreferrer" style={{ color: 'var(--text-dim)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
+                 <div style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' }}></div> Lucas_Log
               </a>
             </div>
           </div>
@@ -158,14 +175,17 @@ export default function Vitrine() {
 
         <main className="vitrine-main">
           <div className="vitrine-hero">
-            <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--wp-yellow)', letterSpacing: '0.2em', marginBottom: 16, textTransform: 'uppercase' }}>Authentic Vaporizers</div>
-            <h1>Sua Experiência <span>Premium</span><br/>em Vapes 🌊</h1>
-            <p>O melhor catálogo de pods descartáveis do Brasil. Qualidade garantida, entrega expressa e os sabores mais procurados do mercado.</p>
+            <div style={{ fontSize: 12, fontWeight: 900, color: 'var(--wp-yellow)', letterSpacing: '0.4em', marginBottom: 24, textTransform: 'uppercase' }}>Authentic_Vaporizers_Node</div>
+            <h1>Premium <span style={{ color: 'var(--wp-yellow)' }}>Disposable</span><br/>Pods Catalog</h1>
+            <p style={{ maxWidth: 600, marginTop: 24, color: 'var(--text-dim)', fontSize: 18, lineHeight: 1.6 }}>The definitive collection of elite vaporizers. Engineering quality, express logistics, and the most exclusive flavors in the territory.</p>
           </div>
 
           <div className="catalog-wrap">
             {loading ? (
-              <div style={{ padding: 40, textAlign: 'center', color: '#666' }}>Sincronizando estoque...</div>
+              <div style={{ padding: 100, textAlign: 'center' }}>
+                <div className="loader" style={{ margin: '0 auto' }}></div>
+                <div style={{ marginTop: 20, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dark)', letterSpacing: '0.2em' }}>SYNCING_INVENTORY...</div>
+              </div>
             ) : (
               catalogo.map(cat => (
                 <div key={cat.linha} id={`pc-${cat.linha}`}>
@@ -184,6 +204,6 @@ export default function Vitrine() {
       </div>
 
       <CartBar cart={cart} onCheckout={() => navigate('/checkout')} />
-    </>
+    </div>
   )
 }

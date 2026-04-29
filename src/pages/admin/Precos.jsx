@@ -17,14 +17,13 @@ export default function Precos() {
 
   useEffect(() => { carregar() }, [])
 
-  // Agrupamento por Modelo e Filtro de Busca
   const modelosFiltrados = useMemo(() => {
     const groups = {}
     data.forEach(p => {
       if (!groups[p.nome]) {
         groups[p.nome] = { ...p, total_estoque: 0 }
       }
-      groups[p.nome].total_estoque += p.quantidade
+      groups[p.nome].total_estoque += (p.quantidade || 0)
     })
     
     return Object.values(groups).filter(m => 
@@ -49,82 +48,72 @@ export default function Precos() {
     }
   }
 
-  if (loading) return <div style={{ padding: 40, color: '#666' }}>Carregando catálogo mestre...</div>
+  if (loading) return (
+    <div style={{ height: '40vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="loader"></div>
+    </div>
+  )
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 800 }}>Preços do Catálogo</h1>
-          <p style={{ color: '#666', fontSize: 14 }}>Gestão centralizada de valores para vitrine.</p>
+          <h1 style={{ fontSize: 32, fontWeight: 900, color: '#FFF' }}>Config <span style={{ color: 'var(--wp-yellow)' }}>Nexus</span></h1>
+          <p style={{ color: 'var(--text-dim)', fontSize: 14 }}>Global price node synchronization for online catalogs.</p>
         </div>
-        <button className="btn-primary" onClick={salvarModelos} style={{ 
-          padding: '12px 32px',
-          background: 'var(--wp-yellow)',
-          color: '#000',
-          fontWeight: 900,
-          border: 'none',
-          borderRadius: '12px',
-          textTransform: 'uppercase'
-        }}>SALVAR ALTERAÇÕES ✓</button>
+        <button className="btn-ultimate" onClick={salvarModelos} style={{ padding: '16px 40px' }}>
+           SYNC_CHANGES ✓
+        </button>
       </div>
 
-      <div className="ipad-card" style={{ padding: 0, overflow: 'hidden' }}>
-        {/* BARRA DE BUSCA INTEGRADA */}
-        <div style={{ padding: '20px 30px', borderBottom: '1px solid #18181b', display: 'flex', alignItems: 'center', gap: 15 }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input 
-            type="text" 
-            placeholder="Buscar por modelo (Ex: Ignite, Elfbar...)" 
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            style={{ background: 'transparent', border: 'none', fontSize: 16, padding: 0, width: '100%', fontWeight: 500 }}
-          />
-        </div>
+      <div className="premium-card">
+         <div style={{ marginBottom: 40, display: 'flex', gap: 16, alignItems: 'center', paddingBottom: 20, borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: 20, color: 'var(--text-dark)' }}>🔍</span>
+            <input 
+              className="input-premium" 
+              style={{ border: 'none', padding: '10px 0', fontSize: 18, fontWeight: 500 }}
+              placeholder="Search resource model..." 
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+            />
+         </div>
 
-        <div className="premium-table-wrap" style={{ border: 'none', borderRadius: 0 }}>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ paddingLeft: 30 }}>MODELO / PRODUTO</th>
-                <th>ESPECIFICAÇÃO</th>
-                <th>ESTOQUE DISPONÍVEL</th>
-                <th style={{ textAlign: 'right', paddingRight: 30 }}>PREÇO DE VENDA (R$)</th>
+        <table className="wp-surface">
+          <thead>
+            <tr>
+              <th>Model / Resource</th>
+              <th>Status</th>
+              <th style={{ textAlign: 'right' }}>Yield Config (R$)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {modelosFiltrados.map(m => (
+              <tr key={m.nome}>
+                <td style={{ fontWeight: 800, fontSize: 18, color: '#FFF' }}>{m.nome}</td>
+                <td>
+                   <span className={`status-chip ${m.total_estoque > 0 ? 'success' : ''}`}>
+                     {m.total_estoque} UNITS_AVAILABLE
+                   </span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <div style={{ position: 'relative', width: 160 }}>
+                      <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--wp-yellow)', fontSize: 14 }}>R$</span>
+                      <input 
+                        type="number" 
+                        step="0.01"
+                        className="input-premium"
+                        value={m.preco_venda} 
+                        onChange={(e) => atualizarLocal(m.nome, e.target.value)}
+                        style={{ paddingLeft: 45, fontWeight: 900, fontSize: 18, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}
+                      />
+                    </div>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {modelosFiltrados.map(m => (
-                <tr key={m.nome}>
-                  <td style={{ paddingLeft: 30 }}>
-                    <div style={{ fontWeight: 800, fontSize: 16, color: '#fff' }}>{m.nome}</div>
-                  </td>
-                  <td>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: '#52525b' }}>{m.puffs} PUFFS</div>
-                  </td>
-                  <td>
-                    <div className="status-pill" style={{ color: m.total_estoque > 0 ? '#10b981' : '#ef4444' }}>
-                      <div className="status-dot" style={{ background: m.total_estoque > 0 ? '#10b981' : '#ef4444' }}></div>
-                      {m.total_estoque} UNIDADES EM ESTOQUE
-                    </div>
-                  </td>
-                  <td style={{ paddingRight: 30 }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                      <div style={{ position: 'relative', width: 160 }}>
-                        <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--wp-yellow)', fontSize: 14 }}>R$</span>
-                        <input 
-                          type="number" 
-                          value={m.preco_venda} 
-                          onChange={(e) => atualizarLocal(m.nome, e.target.value)}
-                          style={{ paddingLeft: 45, fontWeight: 800, fontSize: 18, background: '#09090b', height: 48, borderRadius: 10 }}
-                        />
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
