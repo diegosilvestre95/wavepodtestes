@@ -16,97 +16,108 @@ export default function Login() {
   }
 
   return (
-    <div className="login-container" style={{ 
+    <div className="login-portal" style={{ 
       display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
       minHeight: '100vh',
-      background: 'radial-gradient(circle at center, #111111 0%, #09090b 100%)'
+      background: '#09090b',
+      color: '#fff'
     }}>
       
-      <div className="login-box" style={{ 
-        animation: 'fadeIn 0.8s ease-out',
-        background: '#121212',
-        border: '1px solid #27272a',
-        padding: '60px 40px',
-        borderRadius: '32px',
-        width: '100%',
-        maxWidth: '420px',
-        boxShadow: '0 50px 100px rgba(0,0,0,0.8)'
+      {/* LADO ESQUERDO: BRANDING & IMPACTO (DESKTOP ONLY) */}
+      <div className="login-hero" style={{ 
+        flex: 1, 
+        background: 'radial-gradient(circle at 70% 30%, #1a1a1e 0%, #09090b 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '80px',
+        borderRight: '1px solid #18181b',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        
-        <div style={{ textAlign: 'center', marginBottom: 50 }}>
-          <Logo size={70} showText={true} light />
+        <div style={{ position: 'relative', zIndex: 10 }}>
+          <Logo size={120} showText={false} light />
+          <h1 style={{ fontSize: 56, fontWeight: 800, marginTop: 40, lineHeight: 1.1, letterSpacing: '-0.04em' }}>
+            A Gestão do Seu <br/>
+            <span style={{ color: 'var(--wp-yellow)' }}>Lucro Começa Aqui.</span>
+          </h1>
+          <p style={{ marginTop: 24, color: '#52525b', fontSize: 18, maxWidth: 400, lineHeight: 1.6 }}>
+            Bem-vindo ao ERP WavePod. Controle seus dividendos, estoque e vendas em uma interface de alta performance.
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 25 }}>
-          
-          <div className="form-group">
-            <label style={{ color: '#52525b', fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', marginBottom: 10, display: 'block' }}>IDENTIFICAÇÃO DE ACESSO</label>
-            <div style={{ position: 'relative' }}>
-               <span style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }}>👤</span>
-               <input 
+        {/* EFEITOS DE FUNDO */}
+        <div style={{ position: 'absolute', bottom: '-50px', right: '-50px', width: 400, height: 400, background: 'var(--wp-yellow)', filter: 'blur(180px)', opacity: 0.05 }}></div>
+      </div>
+
+      {/* LADO DIREITO: FORMULÁRIO DE ACESSO */}
+      <div className="login-form-side" style={{ 
+        width: '500px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px',
+        background: '#09090b'
+      }}>
+        
+        <div style={{ width: '100%', maxWidth: '360px', animation: 'fadeIn 0.6s ease-out' }}>
+          <div style={{ marginBottom: 40 }}>
+             <Logo size={40} light />
+             <h2 style={{ fontSize: 24, fontWeight: 800, marginTop: 20 }}>Portal Administrativo</h2>
+             <p style={{ color: '#52525b', fontSize: 14 }}>Insira suas credenciais para gerenciar a operação.</p>
+          </div>
+
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div className="form-group">
+              <label style={{ color: '#3f3f46', fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', marginBottom: 8, display: 'block' }}>IDENTIFICAÇÃO</label>
+              <input 
                 type="text" 
                 placeholder="Nome de usuário" 
                 value={user} 
                 onChange={e => setUser(e.target.value)}
-                style={{ paddingLeft: 45, background: '#050505', height: 56 }}
+                style={{ background: '#121212', height: 52, border: '1px solid #1e1e22' }}
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label style={{ color: '#52525b', fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', marginBottom: 10, display: 'block' }}>SENHA DE SEGURANÇA</label>
-            <div style={{ position: 'relative' }}>
-               <span style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', opacity: 0.3 }}>🔒</span>
-               <input 
+            <div className="form-group">
+              <label style={{ color: '#3f3f46', fontSize: 10, fontWeight: 800, letterSpacing: '0.1em', marginBottom: 8, display: 'block' }}>SENHA PRIVADA</label>
+              <input 
                 type="password" 
                 placeholder="••••••••" 
                 value={pass} 
                 onChange={e => setPass(e.target.value)}
-                style={{ paddingLeft: 45, background: '#050505', height: 56 }}
+                style={{ background: '#121212', height: 52, border: '1px solid #1e1e22' }}
               />
             </div>
-          </div>
 
-          <button 
-            type="submit" 
-            className="btn-primary" 
-            disabled={loading}
-            style={{ 
-              marginTop: 10, 
-              height: 60, 
-              fontSize: 15, 
-              letterSpacing: '0.05em',
-              background: 'linear-gradient(135deg, var(--wp-yellow) 0%, #b8860b 100%)',
-              boxShadow: '0 20px 40px rgba(255, 215, 0, 0.15)'
-            }}
-          >
-            {loading ? 'AUTENTICANDO...' : 'SISTEMA LOGIN →'}
-          </button>
+            <button 
+              type="submit" 
+              className="btn-primary" 
+              disabled={loading}
+              style={{ 
+                marginTop: 10, 
+                height: 56, 
+                fontSize: 14,
+                boxShadow: '0 15px 30px rgba(255, 215, 0, 0.1)'
+              }}
+            >
+              {loading ? 'AUTENTICANDO...' : 'ACESSAR DASHBOARD →'}
+            </button>
+          </form>
 
-        </form>
-
-        <div style={{ marginTop: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: 10, color: '#333', fontWeight: 600, letterSpacing: '0.05em' }}>
-            WAVEPOD v2.0.4 · SEGURANÇA ENCRIPTADA
+          <div style={{ marginTop: 60, fontSize: 10, color: '#27272a', fontWeight: 600, textAlign: 'center' }}>
+            WAVEPOD v2.0.4 · SISTEMA DE GESTÃO SOCIETÁRIA
           </div>
         </div>
 
       </div>
 
-      {/* DETALHES DE FUNDO (DECORATIVO) */}
-      <div style={{ 
-        position: 'fixed', 
-        top: '10%', 
-        right: '10%', 
-        width: 300, 
-        height: 300, 
-        background: 'var(--wp-yellow)', 
-        filter: 'blur(150px)', 
-        opacity: 0.03, 
-        zIndex: -1 
-      }}></div>
+      <style>{`
+        @media (max-width: 1024px) {
+          .login-hero { display: none !important; }
+          .login-form-side { width: 100% !important; }
+        }
+      `}</style>
 
     </div>
   )
