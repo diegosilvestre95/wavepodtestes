@@ -69,7 +69,29 @@ input, select {
 }
 input:focus { border-color: var(--wp-yellow); box-shadow: 0 0 15px var(--wp-yellow-glow); }
 
-/* ── RESPONSIVIDADE MOBILE ── */
+.ipad-card {
+  background: #121212;
+  border: 1px solid #1e1e22;
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 24px;
+  width: 100%; /* Ocupa tudo no Desktop por padrão */
+}
+
+.ipad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 Colunas no Desktop */
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+/* ── RESPONSIVIDADE MOBILE (ISOLADA) ── */
+@media (max-width: 1024px) {
+  .ipad-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
 @media (max-width: 768px) {
   .dash-stage {
     padding: 20px 15px 100px 15px !important;
@@ -83,6 +105,7 @@ input:focus { border-color: var(--wp-yellow); box-shadow: 0 0 15px var(--wp-yell
   .ipad-card {
     padding: 20px;
     margin-bottom: 15px;
+    border-radius: 16px;
   }
 
   h1 { font-size: 24px !important; }

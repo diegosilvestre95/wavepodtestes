@@ -137,7 +137,7 @@ export default function Admin() {
         .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
         .search-engine-wrap { 
           background: #121212; border: 1px solid #1e1e22; border-radius: 12px; 
-          padding: 0 18px; display: flex; align-items: center; gap: 14px; width: 400px; height: 48px;
+          padding: 0 18px; display: flex; align-items: center; gap: 14px; width: 600px; height: 48px;
         }
         .search-engine-wrap input { 
           background: transparent; border: none; color: #fff; font-size: 14px; 

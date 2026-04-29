@@ -66,7 +66,7 @@ export default function Vendas() {
         <p style={{ color: '#666', fontSize: 14 }}>Registre vendas diretas e baixe o estoque instantaneamente.</p>
       </div>
 
-      <div className="ipad-card" style={{ maxWidth: 600 }}>
+      <div className="ipad-card">
         
         {/* BUSCA RÁPIDA NO ESTOQUE */}
         <div className="form-group">
