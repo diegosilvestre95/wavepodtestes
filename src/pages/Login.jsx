@@ -131,10 +131,10 @@ export default function Login() {
 
         .login-content-split {
           width: 100%;
-          max-width: 1200px;
+          max-width: 1100px;
           display: grid;
-          grid-template-columns: 1.2fr 1fr;
-          gap: 100px;
+          grid-template-columns: 1.1fr 0.9fr;
+          gap: 60px;
           position: relative;
           z-index: 10;
         }
@@ -146,12 +146,12 @@ export default function Login() {
         }
 
         .hero-title {
-          font-size: 64px;
-          font-weight: 900;
-          line-height: 1;
-          letter-spacing: -0.04em;
+          font-size: 52px;
+          font-weight: 800;
+          line-height: 1.1;
+          letter-spacing: -0.03em;
           color: #fff;
-          margin-bottom: 24px;
+          margin-bottom: 20px;
         }
 
         .hero-title span {
@@ -159,68 +159,71 @@ export default function Login() {
         }
 
         .hero-desc {
-          font-size: 18px;
-          color: #94a3b8;
+          font-size: 16px;
+          color: #64748b;
           line-height: 1.6;
-          margin-bottom: 40px;
-          max-width: 500px;
+          margin-bottom: 32px;
+          max-width: 460px;
         }
 
         .pill-group {
           display: flex;
-          gap: 12px;
+          gap: 15px;
         }
 
         .pill-item {
           display: flex;
           align-items: center;
-          gap: 8px;
-          background: rgba(30, 41, 59, 0.5);
-          border: 1px solid rgba(51, 65, 85, 0.5);
-          padding: 8px 16px;
-          border-radius: 100px;
-          color: #f1f5f9;
-          font-size: 13px;
-          font-weight: 600;
+          gap: 10px;
+          background: rgba(15, 23, 42, 0.4);
+          border: 1px solid rgba(30, 41, 59, 0.5);
+          padding: 10px 20px;
+          border-radius: 12px;
+          color: #94a3b8;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .login-card-wrapper {
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-end;
         }
 
         .login-card-premium {
           width: 100%;
-          max-width: 450px;
-          background: rgba(15, 23, 42, 0.6);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(51, 65, 85, 0.5);
-          padding: 60px 50px;
-          border-radius: 40px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          max-width: 420px;
+          background: #0f172a;
+          border: 1px solid rgba(51, 65, 85, 0.3);
+          padding: 45px;
+          border-radius: 24px;
+          box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
         }
 
         .form-group-premium {
-          margin-bottom: 24px;
+          margin-bottom: 20px;
         }
 
         .form-group-premium label {
           display: block;
-          font-size: 13px;
-          font-weight: 700;
-          color: #cbd5e1;
-          margin-bottom: 10px;
+          font-size: 12px;
+          font-weight: 800;
+          color: #475569;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
         .form-group-premium input {
           width: 100%;
-          height: 56px;
-          background: #f1f5f9;
+          height: 52px;
+          background: #f8fafc;
           border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          padding: 0 20px;
-          font-size: 15px;
+          border-radius: 12px;
+          padding: 0 18px;
+          font-size: 14px;
           color: #0f172a;
           font-weight: 600;
           transition: all 0.2s;
@@ -228,26 +231,27 @@ export default function Login() {
 
         .form-group-premium input:focus {
           border-color: var(--wp-yellow);
-          box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+          background: #fff;
+          box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.05);
         }
 
         .btn-login-glow {
           width: 100%;
-          height: 64px;
+          height: 54px;
           background: var(--wp-yellow);
           color: #000;
           border: none;
-          border-radius: 18px;
-          font-size: 14px;
+          border-radius: 12px;
+          font-size: 13px;
           font-weight: 900;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.08em;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 12px;
+          gap: 10px;
           cursor: pointer;
           transition: all 0.3s;
-          box-shadow: 0 10px 30px -10px rgba(255, 215, 0, 0.4);
+          box-shadow: 0 8px 20px -6px rgba(255, 215, 0, 0.4);
         }
 
         .btn-login-glow:hover {
