@@ -1,69 +1,88 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { sb } from '../../lib/supabase'
 import { useApp } from '../../context/AppContext'
 
 export default function Precos() {
-  const { catalogo, setCatalogo, toast } = useApp()
-  const [valores, setValores] = useState({})
-  const [saved, setSaved] = useState(false)
+  const { toast } = useApp()
+  const [modelos, setModelos] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const handleChange = (linha, v) => {
-    setValores(prev => ({ ...prev, [linha]: v }))
+  const carregar = async () => {
+    setLoading(true)
+    const { data } = await sb.from('produtos').select('nome, preco_venda, puffs').order('nome')
+    const unique = []
+    const names = new Set()
+    data?.forEach(p => {
+      if (!names.has(p.nome)) {
+        names.add(p.nome)
+        unique.push({ ...p, novo_preco: p.preco_venda })
+      }
+    })
+    setModelos(unique)
+    setLoading(false)
+  }
+
+  useEffect(() => { carregar() }, [])
+
+  const atualizarPreco = (nome, val) => {
+    setModelos(prev => prev.map(m => m.nome === nome ? { ...m, novo_preco: val } : m))
   }
 
   const salvar = async () => {
-    setSaved(false)
-    for (const prod of catalogo) {
-      const raw = valores[prod.linha]
-      if (raw === undefined) continue
-      const v = parseFloat(raw)
-      if (isNaN(v) || v <= 0) { toast('Preço inválido para ' + prod.nome, '⚠️'); return }
-      setCatalogo(prev => prev.map(c => c.linha === prod.linha ? { ...c, preco: v } : c))
-      await sb.from('config').upsert({ chave: prod.linha, valor: v }, { onConflict: 'chave' })
+    try {
+      for (const m of modelos) {
+        if (m.novo_preco !== m.preco_venda) {
+          await sb.from('produtos').update({ preco_venda: m.novo_preco }).eq('nome', m.nome)
+        }
+      }
+      toast('Preços atualizados no catálogo!', '💰')
+      carregar()
+    } catch (e) {
+      toast('Erro ao salvar preços', '❌')
     }
-    setSaved(true)
-    toast('Preços salvos e aplicados na vitrine!')
-    setTimeout(() => setSaved(false), 3000)
   }
 
-  return (
-    <div className="container">
-      <h2 className="section-title">Preços do Catálogo</h2>
-      <div className="card" style={{ maxWidth: 700 }}>
-        <p style={{ color: 'var(--muted)', fontSize: 13, margin: '0 0 20px', lineHeight: 1.6 }}>
-          Altere o preço de venda exibido no catálogo. Ao salvar, aplica imediatamente na vitrine.
-        </p>
+  if (loading) return <div style={{ padding: 40, color: '#666' }}>Sincronizando tabela de preços...</div>
 
-        {catalogo.map(prod => (
-          <div key={prod.linha} className="price-edit-card">
-            <div style={{ flex: 1, minWidth: 160 }}>
-              <span style={{ fontSize: 30 }}>{prod.emoji}</span>
-              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 16, marginTop: 6 }}>{prod.nome}</div>
-              <div style={{ fontSize: 12, color: 'var(--muted)' }}>{prod.desc}</div>
+  return (
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 800 }}>Preços do Catálogo</h1>
+          <p style={{ color: '#666', fontSize: 14 }}>Ajuste os valores de venda exibidos na vitrine em tempo real.</p>
+        </div>
+        <button className="btn-primary" onClick={salvar} style={{ padding: '12px 24px' }}>SALVAR ALTERAÇÕES ✓</button>
+      </div>
+
+      <div className="ipad-grid">
+        {modelos.map(m => (
+          <div key={m.nome} className="ipad-card" style={{ padding: 24 }}>
+            <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+              <div style={{ fontSize: 32 }}>💨</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 800, fontSize: 18 }}>{m.nome}</div>
+                <div style={{ fontSize: 12, color: '#666', fontWeight: 700 }}>{m.puffs} PUFFS</div>
+              </div>
             </div>
-            <div>
-              <label style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.07em', display: 'block', marginBottom: 6 }}>
-                Preço de venda (R$)
-              </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: 'var(--green)', fontWeight: 700, fontSize: 18 }}>R$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  defaultValue={prod.preco.toFixed(2)}
-                  onChange={e => handleChange(prod.linha, e.target.value)}
-                  style={{ width: 120, fontFamily: 'Outfit, sans-serif', fontSize: 20, fontWeight: 700, color: 'var(--green)', textAlign: 'center' }}
+
+            <div className="form-group" style={{ marginTop: 24, marginBottom: 0 }}>
+              <label>Preço de Venda (R$)</label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', fontWeight: 800, color: 'var(--wp-yellow)' }}>R$</span>
+                <input 
+                  type="number" 
+                  value={m.novo_preco} 
+                  onChange={(e) => atualizarPreco(m.nome, e.target.value)}
+                  style={{ paddingLeft: 45, fontWeight: 800, fontSize: 20 }}
                 />
               </div>
             </div>
+            
+            <div style={{ marginTop: 12, fontSize: 11, color: m.novo_preco !== m.preco_venda ? 'var(--wp-yellow)' : '#444', fontWeight: 700 }}>
+              {m.novo_preco !== m.preco_venda ? '• ALTERAÇÃO PENDENTE' : '• PREÇO ATUALIZADO'}
+            </div>
           </div>
         ))}
-
-        <div className="btn-row">
-          <button className="btn-primary" onClick={salvar}>Salvar Preços ✓</button>
-          {saved && <span style={{ color: 'var(--green)', fontSize: 13 }}>✓ Salvo e aplicado!</span>}
-        </div>
       </div>
     </div>
   )

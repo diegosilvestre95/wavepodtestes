@@ -1,49 +1,62 @@
-import { useApp } from '../../context/AppContext'
+import { useState, useEffect } from 'react'
+import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
-import Badge from '../../components/Badge'
 
 export default function Estoque() {
-  const { produtosDB, carregarProdutos } = useApp()
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const carregar = async () => {
+    setLoading(true)
+    const { data } = await sb.from('produtos').select('*').order('nome')
+    setItems(data || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { carregar() }, [])
+
+  if (loading) return <div style={{ padding: 40, color: '#666' }}>Lendo inventário completo...</div>
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
-        <h2 className="section-title" style={{ margin: 0 }}>Estoque completo</h2>
-        <button className="btn-ghost" onClick={carregarProdutos} style={{ fontSize: 12, padding: '7px 13px' }}>
-          ↻ Atualizar
-        </button>
+    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 800 }}>Inventário de Estoque</h1>
+          <p style={{ color: '#666', fontSize: 14 }}>Visão detalhada de todos os itens e custos operacionais.</p>
+        </div>
+        <button className="btn-action" onClick={carregar}>🔄 ATUALIZAR</button>
       </div>
 
-      <div className="card">
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Produto</th>
-                <th>Sabor</th>
-                <th>Qtd</th>
-                <th>Custo unit.</th>
-                <th>Valor em estoque</th>
-                <th>Status</th>
+      <div className="premium-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Sabor</th>
+              <th>Estoque</th>
+              <th>Custo Unit.</th>
+              <th>Vlr em Estoque</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map(i => (
+              <tr key={i.id}>
+                <td style={{ fontWeight: 700, color: '#fff' }}>{i.nome}</td>
+                <td>{i.sabor}</td>
+                <td style={{ fontWeight: 800, color: i.quantidade <= 2 ? '#ef4444' : '#fff' }}>{i.quantidade} un</td>
+                <td>R$ {fmt(i.custo_unitario)}</td>
+                <td style={{ fontWeight: 700 }}>R$ {fmt(i.quantidade * i.custo_unitario)}</td>
+                <td>
+                  <span className={`status-pill ${i.quantidade === 0 ? 'warning' : ''}`} 
+                        style={{ background: i.quantidade === 0 ? '#ef4444' : i.quantidade <= 2 ? '#f59e0b' : 'var(--wp-yellow)' }}>
+                    {i.quantidade === 0 ? 'ESGOTADO' : i.quantidade <= 2 ? 'BAIXO' : 'OK'}
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {produtosDB.map(p => (
-                <tr key={p.id}>
-                  <td style={{ fontWeight: 500 }}>{p.nome}</td>
-                  <td style={{ color: 'var(--muted)' }}>{p.sabor || '—'}</td>
-                  <td>{p.quantidade}</td>
-                  <td>R$ {parseFloat(p.custo || 0).toFixed(2)}</td>
-                  <td>R$ {fmt((p.quantidade || 0) * parseFloat(p.custo || 0))}</td>
-                  <td><Badge tipo={p.quantidade} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {produtosDB.length === 0 && (
-            <div className="empty"><span>📦</span>Nenhum produto cadastrado</div>
-          )}
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
