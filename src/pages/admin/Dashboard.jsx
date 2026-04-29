@@ -126,7 +126,7 @@ export default function Dashboard() {
                                  <div className="prod-thumb">💨</div>
                                  <div>
                                     <div style={{ fontWeight: 700 }}>{p.cliente_nome}</div>
-                                    <div style={{ fontSize: 10, color: '#555' }}>ID: {p.id.slice(0,6).toUpperCase()}</div>
+                                    <div style={{ fontSize: 10, color: '#555' }}>ID: {String(p.id).slice(0,6).toUpperCase()}</div>
                                  </div>
                               </div>
                            </td>
