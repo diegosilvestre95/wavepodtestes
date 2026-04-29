@@ -2,7 +2,7 @@ import { useApp } from '../context/AppContext'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Header({ showAdminBtn = false, showLogout = false }) {
-  const { currentUser, logout } = useApp()
+  const { logout } = useApp()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -17,15 +17,15 @@ export default function Header({ showAdminBtn = false, showLogout = false }) {
         <div className="logo-text">WAVEPOD</div>
       </Link>
 
-      <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
         {showAdminBtn && (
-          <button onClick={() => navigate('/admin')} className="btn-primary" style={{ padding: '10px 20px', fontSize: 11, borderRadius: '30px' }}>
-             Admin Panel
+          <button onClick={() => navigate('/admin')} className="btn-primary" style={{ padding: '12px 24px' }}>
+             SISTEMA ADMIN
           </button>
         )}
         {showLogout && (
-          <button onClick={handleLogout} className="btn-ghost" style={{ padding: '10px 20px', fontSize: 12 }}>
-            Sair
+          <button onClick={handleLogout} className="btn-ghost-dark">
+            SAIR DO SISTEMA
           </button>
         )}
       </div>

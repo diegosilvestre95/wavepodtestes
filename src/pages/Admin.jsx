@@ -69,47 +69,41 @@ export default function Admin() {
 
   return (
     <>
-      <Header showLogout />
-
       <div className="admin-layout">
         {/* SIDEBAR REFINADA (CONFORME REFERÊNCIA) */}
-        <aside className="admin-sidebar" style={{ background: '#f5f5f5', borderRight: '1px solid #ddd' }}>
-          <div style={{ padding: '0 24px 30px' }}>
-             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '15px', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
-                <div className="logo-mark" style={{ width: 32, height: 32, fontSize: 12 }}>WP</div>
+        <aside className="admin-sidebar">
+          <div style={{ padding: '0 28px 40px' }}>
+             <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12, padding: '16px', background: '#f8f9fa', borderRadius: '12px', border: '1px solid #eee' }}>
+                <div className="logo-mark" style={{ width: 36, height: 36 }} />
                 <div>
-                    <div style={{ fontSize: 12, fontWeight: 800 }}>WAVEPOD</div>
-                    <div style={{ fontSize: 10, color: '#999' }}>Painel Administrativo</div>
+                    <div style={{ fontSize: 13, fontWeight: 800, color: '#000' }}>WAVEPOD</div>
+                    <div style={{ fontSize: 10, color: '#999', fontWeight: 600 }}>PAINEL ESTRATÉGICO</div>
                 </div>
-             </div>
+             </Link>
           </div>
 
           {SECTIONS.map(section => (
-            <div key={section} style={{ marginBottom: 25 }}>
-              <div className="vsidebar-cat-title" style={{ padding: '0 24px', color: '#888' }}>{section}</div>
+            <div key={section} style={{ marginBottom: 32 }}>
+              <div className="sidebar-label-small" style={{ padding: '0 28px' }}>{section}</div>
               {TELAS.filter(t => t.section === section).map(t => (
                 <div key={t.id}
-                  className={`vsidebar-item${tela === t.id ? ' active-cat' : ''}`}
-                  style={{ 
-                    margin: '2px 16px', 
-                    borderRadius: '10px', 
-                    color: tela === t.id ? 'var(--wp-yellow)' : '#555',
-                    background: tela === t.id ? 'var(--wp-gray-dark)' : 'transparent'
-                  }}
+                  className={`admin-sidebar-item${tela === t.id ? ' active' : ''}`}
                   onClick={() => setTela(t.id)}>
-                  <span>{t.icon}</span>
-                  <span style={{ fontWeight: 600 }}>{t.label}</span>
+                  <span style={{ fontSize: 18 }}>{t.icon}</span>
+                  <span>{t.label}</span>
                 </div>
               ))}
             </div>
           ))}
 
-          <div style={{ marginTop: 'auto', padding: '24px', borderTop: '1px solid #eee' }}>
+          <div style={{ marginTop: 'auto', padding: '32px 28px', borderTop: '1px solid #f1f3f5' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--grad-metallic)', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: '#fff', fontWeight: 800 }}>{currentUser?.nome?.[0] || 'A'}</div>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--wp-yellow)', fontWeight: 800, fontSize: 16 }}>
+                  {currentUser?.nome?.[0] || 'A'}
+                </div>
                 <div>
-                    <div style={{ fontSize: 13, fontWeight: 700 }}>{currentUser?.nome || 'Admin'}</div>
-                    <div style={{ fontSize: 11, color: '#999' }}>Sessão Ativa</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#000' }}>{currentUser?.nome || 'Administrador'}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 600 }}>Acesso Vitalício</div>
                 </div>
              </div>
           </div>
