@@ -1,124 +1,97 @@
 import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
-import StatCard from '../../components/admin/StatCard'
 
 export default function Dashboard() {
-  const [vendas, setVendas] = useState([])
-  const [compras, setCompras] = useState([])
-  const [pedidos, setPedidos] = useState([])
+  const [data, setData] = useState({ vendas: [], compras: [], pedidos: [] })
   const [loading, setLoading] = useState(true)
 
-  const carregarDados = async () => {
+  const carregar = async () => {
     setLoading(true)
     const [v, c, p] = await Promise.all([
       sb.from('vendas').select('*').order('data', { ascending: false }),
       sb.from('compras').select('*'),
       sb.from('pedidos').select('*').order('created_at', { ascending: false })
     ])
-    
-    setVendas(v.data || [])
-    setCompras(c.data || [])
-    setPedidos(p.data || [])
+    setData({ vendas: v.data || [], compras: c.data || [], pedidos: p.data || [] })
     setLoading(false)
   }
 
-  useEffect(() => { carregarDados() }, [])
+  useEffect(() => { carregar() }, [])
 
   const stats = useMemo(() => {
-    const investido = compras.reduce((a, b) => a + (parseFloat(b.custo || 0) * parseInt(b.quantidade || 0)) + parseFloat(b.frete || 0), 0)
-    const fatVendas = vendas.reduce((a, b) => a + (parseFloat(b.preco_venda || 0) * parseInt(b.quantidade || 0)), 0)
-    const fatPedidos = pedidos.filter(p => p.status === 'Confirmado').reduce((a, b) => a + parseFloat(b.total || 0), 0)
-
+    const investido = data.compras.reduce((a, b) => a + (parseFloat(b.custo || 0) * parseInt(b.quantidade || 0)) + parseFloat(b.frete || 0), 0)
+    const fatVendas = data.vendas.reduce((a, b) => a + (parseFloat(b.preco_venda || 0) * parseInt(b.quantidade || 0)), 0)
+    const fatPedidos = data.pedidos.filter(p => p.status === 'Confirmado').reduce((a, b) => a + parseFloat(b.total || 0), 0)
     const faturamento = fatVendas + fatPedidos
-    const lucroLiquido = faturamento - investido
-    const margem = faturamento > 0 ? (lucroLiquido / faturamento) * 100 : 0
-    const porSocio = lucroLiquido / 2
+    return { investido, faturamento, lucro: faturamento - investido, porSocio: (faturamento - investido) / 2 }
+  }, [data])
 
-    return { investido, faturamento, lucroLiquido, margem, porSocio }
-  }, [vendas, compras, pedidos])
-
-  if (loading) return <div style={{ padding: 40, color: '#666', fontSize: 13 }}>Sincronizando métricas de performance...</div>
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>Sincronizando ativos...</div>
 
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
-      
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
-         <div>
-            <h1>Dashboard</h1>
-            <p className="subtext">Análise consolidada de performance e ativos operacionais.</p>
-         </div>
-         <button className="btn-primary" onClick={carregarDados} style={{ height: 32, fontSize: 11, padding: '0 16px' }}>
-            ATUALIZAR DADOS
-         </button>
+    <div>
+      <div className="stat-grid">
+        <div className="stat-card" style={{ borderLeft: '4px solid #3b82f6' }}>
+          <div className="stat-label">Investimento Total</div>
+          <div className="stat-value">R$ {fmt(stats.investido)}</div>
+        </div>
+        <div className="stat-card" style={{ borderLeft: '4px solid var(--wp-yellow)' }}>
+          <div className="stat-label">Receita Bruta</div>
+          <div className="stat-value">R$ {fmt(stats.faturamento)}</div>
+        </div>
+        <div className="stat-card" style={{ borderLeft: '4px solid #10b981' }}>
+          <div className="stat-label">Lucro Líquido</div>
+          <div className="stat-value" style={{ color: '#10b981' }}>R$ {fmt(stats.lucro)}</div>
+        </div>
+        <div className="stat-card" style={{ background: 'linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%)', border: '1px solid var(--wp-yellow)' }}>
+          <div className="stat-label" style={{ color: 'var(--wp-yellow)' }}>Cota por Sócio</div>
+          <div className="stat-value" style={{ color: 'var(--wp-yellow)' }}>R$ {fmt(stats.porSocio)}</div>
+        </div>
       </div>
 
-      <div className="ipad-grid">
-         <StatCard label="Investimento Total" value={stats.investido} color="#3b82f6" subtext="Compras e fretes" />
-         <StatCard label="Receita Bruta" value={stats.faturamento} color="var(--wp-yellow)" subtext="Vendas + Pedidos" />
-         <StatCard label="Lucro Líquido" value={stats.lucroLiquido} color="#10b981" subtext={`Margem: ${stats.margem.toFixed(1)}%`} />
-         <StatCard label="Divisão por Sócio" value={stats.porSocio} color="#f59e0b" subtext="Cota de 50%" />
-      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 32 }}>
+        <div className="card">
+          <h3 style={{ marginBottom: 24, fontSize: 16 }}>Movimentação Recente</h3>
+          <table className="table-container">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Valor</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.vendas.slice(0, 6).map(v => (
+                <tr key={v.id}>
+                  <td><strong>{v.nome_produto}</strong> <br/><small style={{color: 'var(--text-muted)'}}>{v.sabor_produto}</small></td>
+                  <td>{v.quantidade} un</td>
+                  <td style={{ fontWeight: 700 }}>R$ {fmt(v.preco_venda)}</td>
+                  <td><span style={{ fontSize: 10, background: 'rgba(255,215,0,0.1)', color: 'var(--wp-yellow)', padding: '4px 8px', borderRadius: 4, fontWeight: 800 }}>VENDA</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-      <div className="ipad-grid" style={{ gridTemplateColumns: '2fr 1.2fr' }}>
-         {/* TABELA DE VENDAS */}
-         <div className="premium-table-wrap">
-            <div style={{ padding: '16px 20px', background: '#050505', borderBottom: '1px solid var(--border-subtle)' }}>
-               <div className="label-caps">Últimas Vendas Manuais</div>
-            </div>
-            <table>
-               <thead>
-                  <tr>
-                     <th>Produto / Modelo</th>
-                     <th>Sabor</th>
-                     <th>Qtd</th>
-                     <th>Valor</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {vendas.slice(0, 8).map(v => (
-                     <tr key={v.id}>
-                        <td style={{ fontWeight: 700 }}>{v.nome_produto}</td>
-                        <td style={{ color: '#94a3b8' }}>{v.sabor_produto}</td>
-                        <td style={{ fontWeight: 600 }}>{v.quantidade} un</td>
-                        <td style={{ fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {fmt(v.preco_venda)}</td>
-                     </tr>
-                  ))}
-               </tbody>
-            </table>
-         </div>
-
-         {/* STATUS DE PEDIDOS */}
-         <div className="premium-table-wrap">
-            <div style={{ padding: '16px 20px', background: '#050505', borderBottom: '1px solid var(--border-subtle)' }}>
-               <div className="label-caps">Status de Pedidos</div>
-            </div>
-            <table>
-               <thead>
-                  <tr>
-                     <th>ID</th>
-                     <th>Valor</th>
-                     <th style={{ textAlign: 'right' }}>Status</th>
-                  </tr>
-               </thead>
-               <tbody>
-                  {pedidos.slice(0, 8).map(p => (
-                     <tr key={p.id}>
-                        <td style={{ fontSize: 11, color: '#94a3b8' }}>#{String(p.id).slice(-6)}</td>
-                        <td style={{ fontWeight: 700 }}>R$ {fmt(p.total)}</td>
-                        <td style={{ textAlign: 'right' }}>
-                           <span style={{ 
-                             fontSize: 9, fontWeight: 900, 
-                             color: p.status === 'Confirmado' ? '#10b981' : '#475569' 
-                           }}>
-                              {p.status.toUpperCase()}
-                           </span>
-                        </td>
-                     </tr>
-                  ))}
-               </tbody>
-            </table>
-         </div>
+        <div className="card">
+          <h3 style={{ marginBottom: 24, fontSize: 16 }}>Status de Pedidos</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {data.pedidos.slice(0, 5).map(p => (
+              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>PEDIDO #{String(p.id).slice(-4)}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{new Date(p.created_at).toLocaleDateString()}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {fmt(p.total)}</div>
+                  <div style={{ fontSize: 10, fontWeight: 900, color: p.status === 'Confirmado' ? '#10b981' : '#52525b' }}>{p.status.toUpperCase()}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

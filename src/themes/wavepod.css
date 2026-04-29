@@ -1,159 +1,192 @@
 :root {
+  /* Design Tokens - WavePod Premium */
   --wp-yellow: #FFD700;
-  --wp-yellow-glow: rgba(255, 215, 0, 0.2);
-  --bg-body: #09090b;
-  --bg-card: #18181b;
-  --border-subtle: #27272a;
-  --text-main: #f8fafc;
-  --text-muted: #71717a;
+  --wp-yellow-hover: #FACC15;
+  --wp-yellow-glow: rgba(255, 215, 0, 0.15);
+  
+  --bg-main: #050505;
+  --bg-sidebar: #000000;
+  --bg-card: #0d0d0d;
+  --bg-input: #0a0a0a;
+  
+  --border: #1a1a1a;
+  --border-active: #2a2a2a;
+  
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #52525b;
+  
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
-}
-
-body {
-  background: var(--bg-body);
-  color: var(--text-main);
-  line-height: 1.5;
+  font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── LAYOUT ── */
-.admin-layout { display: flex; min-height: 100vh; }
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  font-size: 14px;
+}
 
-.slim-sidebar {
-  width: 80px;
-  background: #000;
-  border-right: 1px solid var(--border-subtle);
+/* ── LAYOUT CORE ── */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* SIDEBAR (DESKTOP) */
+.sidebar {
+  width: 260px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 30px 0;
+  padding: 32px 16px;
   position: fixed;
-  left: 0; top: 0; bottom: 0;
+  height: 100vh;
   z-index: 1000;
 }
 
-.slim-nav-item {
-  width: 48px;
-  height: 48px;
+.nav-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  color: var(--text-muted);
-  margin-bottom: 12px;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s all ease;
+  margin-bottom: 4px;
 }
 
-.slim-nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
-.slim-nav-item.active { background: var(--wp-yellow); color: #000; box-shadow: 0 0 20px var(--wp-yellow-glow); }
-
-.dash-stage {
-  flex: 1;
-  margin-left: 80px;
-  padding: 40px 60px;
-}
-
-/* ── CARDS & GRIDS ── */
-.ipad-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 24px;
-  transition: 0.3s;
-}
-
-.ipad-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-/* ── TYPOGRAPHY ── */
-h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
-.subtext { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; }
-.label-caps { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; color: var(--text-muted); }
-.value-xl { font-size: 32px; font-weight: 900; color: #fff; letter-spacing: -0.02em; }
-
-/* ── TABLES ── */
-.premium-table-wrap {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-table { width: 100%; border-collapse: collapse; }
-table th {
-  background: #121214;
-  padding: 16px 20px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 900;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border-subtle);
-}
-table td {
-  padding: 16px 20px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--border-subtle);
-  color: #e4e4e7;
-}
-
-/* ── INPUTS & BUTTONS ── */
-input, select {
-  width: 100%;
-  height: 48px;
-  background: #09090b;
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
-  padding: 0 16px;
+.nav-item:hover {
+  background: rgba(255,255,255,0.03);
   color: #fff;
-  font-size: 14px;
-  outline: none;
 }
-input:focus { border-color: var(--wp-yellow); box-shadow: 0 0 15px var(--wp-yellow-glow); }
 
-.btn-primary {
+.nav-item.active {
   background: var(--wp-yellow);
   color: #000;
-  height: 48px;
-  padding: 0 24px;
-  border-radius: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-  border: none;
-  cursor: pointer;
-  transition: 0.3s;
+  font-weight: 700;
 }
-.btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-/* ── RESPONSIVIDADE ── */
+/* MAIN CONTENT AREA */
+.main-stage {
+  flex: 1;
+  margin-left: 260px;
+  padding: 48px 64px;
+  width: calc(100% - 260px);
+}
+
+/* ── UI COMPONENTS ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, #0d0d0d 0%, #080808 100%);
+  border: 1px solid var(--border);
+}
+
+.stat-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.stat-value { font-size: 32px; font-weight: 800; letter-spacing: -0.03em; color: #fff; }
+
+/* TABLES */
+.table-container {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.table-container th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 800;
+  border-bottom: 1px solid var(--border);
+}
+
+.table-container td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.table-container tr:hover td { background: rgba(255,255,255,0.01); }
+
+/* FORMS */
+.input-field {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: #fff;
+  outline: none;
+  transition: 0.2s;
+}
+
+.input-field:focus {
+  border-color: var(--wp-yellow);
+  box-shadow: 0 0 0 2px var(--wp-yellow-glow);
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
+}
+
+.btn-primary { background: var(--wp-yellow); color: #000; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--wp-yellow-glow); }
+
+/* ── RESPONSIVE ── */
 @media (max-width: 1024px) {
-  .ipad-grid { grid-template-columns: repeat(2, 1fr); }
+  .sidebar { width: 80px; padding: 32px 8px; }
+  .sidebar span { display: none; }
+  .main-stage { margin-left: 80px; width: calc(100% - 80px); padding: 32px; }
 }
 
 @media (max-width: 768px) {
-  .dash-stage { margin-left: 0; padding: 20px 15px 100px 15px; }
-  .ipad-grid { grid-template-columns: 1fr; }
-  .desktop-only { display: none !important; }
-  .mobile-only { display: flex !important; }
-
+  .sidebar { display: none; }
+  .main-stage { margin-left: 0; width: 100%; padding: 20px 16px 100px 16px; }
+  
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0; height: 75px;
-    background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border-subtle);
-    display: flex; justify-content: space-around; align-items: center; z-index: 1000;
+    position: fixed; bottom: 0; left: 0; right: 0; height: 72px;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 2000;
   }
-  .bottom-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); }
-  .bottom-item.active { color: var(--wp-yellow); }
-  .bottom-item span { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 }
