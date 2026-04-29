@@ -133,9 +133,15 @@ export function AppProvider({ children }) {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback((username, senha) => {
-    const user = USERS[username]
+    // Normalização para aceitar 'admin', 'Admin', 'socio', etc.
+    const normalizedInput = Object.keys(USERS).find(
+      key => key.toLowerCase() === username.toLowerCase()
+    )
+    
+    const user = normalizedInput ? USERS[normalizedInput] : null
+
     if (user && user.senha === senha) {
-      const u = { login: username, ...user }
+      const u = { login: normalizedInput, ...user }
       localStorage.setItem('wvpod_user', JSON.stringify(u))
       setCurrentUser(u)
       iniciarRealtime()
