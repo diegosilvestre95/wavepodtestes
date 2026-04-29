@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { fmt } from '../lib/utils'
 import Dashboard from './admin/Dashboard'
 import Vendas    from './admin/Vendas'
 import Compras   from './admin/Compras'
@@ -10,19 +9,24 @@ import Precos    from './admin/Precos'
 import Pedidos   from './admin/Pedidos'
 import Logo      from '../components/Logo'
 
-const NAV_ITEMS = [
-  { id: 'pedidos',   label: 'Pedidos',   icon: '📋' },
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-  { id: 'vendas',    label: 'Nova Venda', icon: '💸' },
-  { id: 'compras',   label: 'Estoque',    icon: '📦' },
-  { id: 'estoque',   label: 'Inventário', icon: '🗃️' },
-  { id: 'precos',    label: 'Tabela',     icon: '💰' },
+const SLIM_NAV = [
+  { id: 'dashboard', icon: '🏠' },
+  { id: 'pedidos',   icon: '📋' },
+  { id: 'vendas',    icon: '💸' },
+  { id: 'compras',   icon: '📦' },
+  { id: 'estoque',   icon: '🗃️' },
+  { id: 'precos',    icon: '💰' },
+  { id: 'config',    icon: '⚙️' },
 ]
 
 export default function Admin() {
   const { currentUser, logout } = useApp()
   const navigate = useNavigate()
   const [tela, setTela] = useState('dashboard')
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'dark')
+  }, [])
 
   useEffect(() => {
     if (!currentUser) navigate('/login')
@@ -33,58 +37,43 @@ export default function Admin() {
 
   return (
     <div className="admin-layout">
-      {/* SIDEBAR REPLICADA (iMAC MOCKUP) */}
-      <aside className="admin-sidebar">
-        <div className="sidebar-logo-area">
-          <Link to="/" style={{ textDecoration: 'none' }}>
-             <Logo size={44} />
-          </Link>
+      {/* SLIM SIDEBAR (iPad MOCKUP) */}
+      <aside className="slim-sidebar">
+        <div style={{ marginBottom: 40 }}>
+           <Logo size={40} showText={false} light />
         </div>
-
-        <nav className="sidebar-nav">
-          {NAV_ITEMS.map(item => (
-            <div key={item.id} 
-                 className={`nav-item ${tela === item.id ? 'active' : ''}`}
-                 onClick={() => setTela(item.id)}>
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </div>
-          ))}
-          
-          <div style={{ padding: '20px 16px', color: '#888', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', marginTop: 20 }}>
-            Configurações
+        
+        {SLIM_NAV.map(item => (
+          <div key={item.id} 
+               className={`slim-nav-item ${tela === item.id ? 'active' : ''}`}
+               onClick={() => setTela(item.id)}>
+            {item.icon}
           </div>
-          <div className="nav-item"><span>⚙️</span><span>Preferências</span></div>
-        </nav>
+        ))}
 
-        <div className="sidebar-footer">
-           <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--wp-yellow)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 800, fontSize: 12 }}>
-             {currentUser?.nome?.[0] || 'A'}
-           </div>
-           <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 700 }}>{currentUser?.nome || 'Admin'}</div>
-              <div style={{ fontSize: 10, opacity: 0.6 }}>Sessão Ativa</div>
-           </div>
-           <span style={{ cursor: 'pointer', fontSize: 12 }} onClick={() => logout()}>🚪</span>
+        <div style={{ marginTop: 'auto' }} className="slim-nav-item" onClick={logout}>
+           🚪
         </div>
       </aside>
 
-      {/* PALCO PRINCIPAL */}
-      <main className="main-stage">
-        <header className="top-header">
-           <div className="search-box">
-              <span style={{ opacity: 0.4 }}>🔍</span>
-              <input type="text" placeholder="Buscar pedidos, produtos ou clientes..." />
-           </div>
-
-           <div className="header-tools">
-              <span className="tool-icon">❓</span>
-              <span className="tool-icon active">🔔</span>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800 }}>WP</div>
-           </div>
+      {/* DASHBOARD STAGE */}
+      <main className="dash-stage">
+        <header className="dash-header-ipad">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+             <Logo size={44} light />
+          </div>
+          
+          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+             <span style={{ fontSize: 20, opacity: 0.5 }}>❓</span>
+             <span style={{ fontSize: 20, opacity: 0.5, position: 'relative' }}>
+               🔔
+               <div style={{ position: 'absolute', top: -5, right: -5, background: 'var(--wp-yellow)', width: 8, height: 8, borderRadius: '50%' }}></div>
+             </span>
+             <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#fff', color: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 11 }}>WP</div>
+          </div>
         </header>
 
-        <div className="dash-content">
+        <div style={{ flex: 1 }}>
            <Componente />
         </div>
       </main>
