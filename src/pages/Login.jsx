@@ -6,15 +6,19 @@ import Logo from '../components/Logo'
 export default function Login() {
   const { login } = useApp()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [userKey, setUserKey] = useState('')
   const [pass, setPass] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault()
     setLoading(true)
-    const success = await login(email, pass)
-    if (success) navigate('/admin')
+    const success = login(userKey, pass)
+    if (success) {
+      navigate('/admin')
+    } else {
+      alert('Usuário ou senha incorretos. Verifique suas credenciais.')
+    }
     setLoading(false)
   }
 
@@ -69,12 +73,12 @@ export default function Login() {
 
             <form onSubmit={handleLogin}>
               <div className="form-group-premium">
-                <label>E-mail</label>
+                <label>Usuário ou E-mail</label>
                 <input 
-                  type="email" 
-                  placeholder="seu@email.com" 
-                  value={email} 
-                  onChange={e => setEmail(e.target.value)}
+                  type="text" 
+                  placeholder="Ex: admin" 
+                  value={userKey} 
+                  onChange={e => setUserKey(e.target.value)}
                   required
                 />
               </div>
