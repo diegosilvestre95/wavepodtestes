@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { fmt } from '../lib/utils'
 import { WA_DIEGO, WA_LUCAS } from '../lib/config'
