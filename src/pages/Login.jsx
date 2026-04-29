@@ -117,11 +117,10 @@ export default function Login() {
           min-height: 100vh;
           background: #020617;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          align-items: stretch;
+          justify-content: stretch;
           position: relative;
           overflow: hidden;
-          padding: 40px;
         }
 
         .grid-overlay {
@@ -135,10 +134,9 @@ export default function Login() {
 
         .login-content-split {
           width: 100%;
-          max-width: 1100px;
           display: grid;
-          grid-template-columns: 1.1fr 0.9fr;
-          gap: 60px;
+          grid-template-columns: 1fr 1fr;
+          height: 100vh;
           position: relative;
           z-index: 10;
         }
@@ -147,15 +145,17 @@ export default function Login() {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          padding: 80px;
+          background: radial-gradient(circle at 0% 0%, rgba(255,215,0,0.03) 0%, transparent 50%);
         }
 
         .hero-title {
-          font-size: 52px;
+          font-size: 80px;
           font-weight: 800;
-          line-height: 1.1;
-          letter-spacing: -0.03em;
+          line-height: 0.95;
+          letter-spacing: -0.05em;
           color: #fff;
-          margin-bottom: 20px;
+          margin-bottom: 24px;
         }
 
         .hero-title span {
@@ -193,17 +193,19 @@ export default function Login() {
         .login-card-wrapper {
           display: flex;
           align-items: center;
-          justify-content: flex-end;
+          justify-content: center;
+          background: rgba(0,0,0,0.2);
+          padding: 40px;
         }
 
         .login-card-premium {
           width: 100%;
-          max-width: 420px;
+          max-width: 480px;
           background: #0f172a;
-          border: 1px solid rgba(51, 65, 85, 0.3);
-          padding: 45px;
-          border-radius: 24px;
-          box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
+          border: 1px solid rgba(51, 65, 85, 0.4);
+          padding: 60px;
+          border-radius: 32px;
+          box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.9);
         }
 
         .form-group-premium {
