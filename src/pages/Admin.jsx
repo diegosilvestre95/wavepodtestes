@@ -46,42 +46,48 @@ export default function Admin() {
     return MENU_ITEMS.filter(i => i.label.toLowerCase().includes(search.toLowerCase()))
   }, [search])
 
-  const Componente = { dashboard: Dashboard, vendas: Vendas, compras: Compras, estoque: Estoque, precos: Precos, pedidos: Pedidos }[tela] || Dashboard
+  const Componente = { dashboard: Dashboard, vendas: Vendas, compras: Compras, estoque: Estoque, precos: Precos, pedidos: Pedidos }[active] || Dashboard
 
   return (
     <div className="admin-layout">
-      <aside className="slim-sidebar">
-        <div style={{ marginBottom: 50 }}>
+      {/* SIDEBAR (DESKTOP) */}
+      <aside className="slim-sidebar desktop-only">
+        <div style={{ marginBottom: 40 }}>
            <Logo size={32} showText={false} light />
         </div>
+        
         {MENU_ITEMS.map(item => (
-          <div key={item.id} className={`slim-nav-item ${tela === item.id ? 'active' : ''}`} onClick={() => setTela(item.id)}>
+          <div 
+            key={item.id} 
+            className={`slim-nav-item ${active === item.id ? 'active' : ''}`}
+            onClick={() => setActive(item.id)}
+            title={item.label}
+          >
             {item.icon}
           </div>
         ))}
-        <div style={{ marginTop: 'auto', opacity: 0.5 }} className="slim-nav-item" onClick={logout}>
-           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+
+        <div style={{ marginTop: 'auto' }}>
+          <div className="slim-nav-item" onClick={logout} title="Sair">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          </div>
         </div>
       </aside>
 
+      {/* MAIN STAGE */}
       <main className="dash-stage">
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, paddingBottom: 20, borderBottom: '1px solid #18181b' }}>
-          
-          {/* SEARCH ENGINE GLOBAL */}
-          <div style={{ position: 'relative', width: 400 }}>
-             <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#121212', padding: '10px 16px', borderRadius: 12, border: '1px solid #18181b' }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#52525b" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input 
-                  type="text" 
-                  placeholder="Pesquisar função (Ex: Estoque...)" 
-                  value={search}
-                  onChange={(e) => { setSearch(e.target.value); setShowSearchBox(true); }}
-                  onFocus={() => setShowSearchBox(true)}
-                  style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: 14, width: '100%' }}
-                />
-             </div>
-
-             {showSearchBox && filteredNav.length > 0 && (
+        {/* HEADER / COMMAND CENTER */}
+        <header className="admin-header">
+           <div className="search-engine-wrap" style={{ position: 'relative' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input 
+                type="text" 
+                placeholder="Central de Comando (Busque estoque, vendas, preços...)" 
+                value={search}
+                onChange={e => { setSearch(e.target.value); setShowSearchBox(true); }}
+                onFocus={() => setShowSearchBox(true)}
+              />
+              {showSearchBox && filteredNav.length > 0 && (
                 <div style={{ position: 'absolute', top: 55, left: 0, right: 0, background: '#18181b', border: '1px solid #27272a', borderRadius: 12, zIndex: 100, boxShadow: '0 10px 30px rgba(0,0,0,0.5)', overflow: 'hidden' }}>
                    {filteredNav.map(item => (
                       <div 

@@ -69,6 +69,48 @@ input, select {
 }
 input:focus { border-color: var(--wp-yellow); box-shadow: 0 0 15px var(--wp-yellow-glow); }
 
+/* ── RESPONSIVIDADE MOBILE ── */
+@media (max-width: 768px) {
+  .dash-stage {
+    padding: 20px 15px 100px 15px !important;
+  }
+
+  .ipad-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px;
+  }
+
+  .ipad-card {
+    padding: 20px;
+    margin-bottom: 15px;
+  }
+
+  h1 { font-size: 24px !important; }
+  
+  .premium-table-wrap {
+    margin: 0 -15px;
+    width: calc(100% + 30px);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  table th, table td {
+    padding: 12px 15px;
+    font-size: 13px;
+  }
+
+  .btn-primary {
+    height: 52px;
+    width: 100%;
+  }
+
+  input, select {
+    height: 48px;
+    font-size: 16px; /* Evita zoom automático no iOS */
+  }
+}
+
 .btn-primary {
   background: var(--wp-yellow); color: #000; padding: 16px 32px; border-radius: 12px;
   font-weight: 800; border: none; cursor: pointer; transition: 0.3s; text-transform: uppercase;
