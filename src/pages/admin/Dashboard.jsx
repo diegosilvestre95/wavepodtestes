@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
+import StatCard from '../../components/admin/StatCard'
 
 export default function Dashboard() {
   const [vendas, setVendas] = useState([])
@@ -10,25 +11,22 @@ export default function Dashboard() {
 
   const carregarDados = async () => {
     setLoading(true)
-    const { data: v } = await sb.from('vendas').select('*').order('data', { ascending: false })
-    const { data: c } = await sb.from('compras').select('*')
-    const { data: p } = await sb.from('pedidos').select('*').order('created_at', { ascending: false })
+    const [v, c, p] = await Promise.all([
+      sb.from('vendas').select('*').order('data', { ascending: false }),
+      sb.from('compras').select('*'),
+      sb.from('pedidos').select('*').order('created_at', { ascending: false })
+    ])
     
-    setVendas(v || [])
-    setCompras(c || [])
-    setPedidos(p || [])
+    setVendas(v.data || [])
+    setCompras(c.data || [])
+    setPedidos(p.data || [])
     setLoading(false)
   }
 
   useEffect(() => { carregarDados() }, [])
 
   const stats = useMemo(() => {
-    const investido = compras.reduce((a, b) => {
-      const subtotal = (parseFloat(b.custo || 0) * parseInt(b.quantidade || 0))
-      const freteItem = parseFloat(b.frete || 0)
-      return a + subtotal + freteItem
-    }, 0)
-
+    const investido = compras.reduce((a, b) => a + (parseFloat(b.custo || 0) * parseInt(b.quantidade || 0)) + parseFloat(b.frete || 0), 0)
     const fatVendas = vendas.reduce((a, b) => a + (parseFloat(b.preco_venda || 0) * parseInt(b.quantidade || 0)), 0)
     const fatPedidos = pedidos.filter(p => p.status === 'Confirmado').reduce((a, b) => a + parseFloat(b.total || 0), 0)
 
@@ -45,7 +43,6 @@ export default function Dashboard() {
   return (
     <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
       
-      {/* HEADER COMPACTO */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
          <div>
             <h1>Dashboard</h1>
@@ -56,39 +53,15 @@ export default function Dashboard() {
          </button>
       </div>
 
-      {/* MÉTRICAS DE ALTA FIDELIDADE */}
       <div className="ipad-grid">
-         <div className="ipad-card">
-            <div className="label-caps" style={{ color: '#3b82f6' }}>Investimento Total</div>
-            <div className="value-xl">R$ {fmt(stats.investido)}</div>
-            <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>Compras e fretes</div>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#3b82f6' }}></div>
-         </div>
-
-         <div className="ipad-card">
-            <div className="label-caps" style={{ color: 'var(--wp-yellow)' }}>Receita Bruta</div>
-            <div className="value-xl">R$ {fmt(stats.faturamento)}</div>
-            <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>Vendas + Pedidos</div>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: 'var(--wp-yellow)' }}></div>
-         </div>
-
-         <div className="ipad-card">
-            <div className="label-caps" style={{ color: '#10b981' }}>Lucro Líquido</div>
-            <div className="value-xl" style={{ color: '#10b981' }}>R$ {fmt(stats.lucroLiquido)}</div>
-            <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>Margem: {stats.margem.toFixed(1)}%</div>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#10b981' }}></div>
-         </div>
-
-         <div className="ipad-card">
-            <div className="label-caps" style={{ color: '#f59e0b' }}>Divisão por Sócio</div>
-            <div className="value-xl">R$ {fmt(stats.porSocio)}</div>
-            <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>Cota de 50%</div>
-            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: '#f59e0b' }}></div>
-         </div>
+         <StatCard label="Investimento Total" value={stats.investido} color="#3b82f6" subtext="Compras e fretes" />
+         <StatCard label="Receita Bruta" value={stats.faturamento} color="var(--wp-yellow)" subtext="Vendas + Pedidos" />
+         <StatCard label="Lucro Líquido" value={stats.lucroLiquido} color="#10b981" subtext={`Margem: ${stats.margem.toFixed(1)}%`} />
+         <StatCard label="Divisão por Sócio" value={stats.porSocio} color="#f59e0b" subtext="Cota de 50%" />
       </div>
 
       <div className="ipad-grid" style={{ gridTemplateColumns: '2fr 1.2fr' }}>
-         {/* TABELA DE VENDAS DENSAS */}
+         {/* TABELA DE VENDAS */}
          <div className="premium-table-wrap">
             <div style={{ padding: '16px 20px', background: '#050505', borderBottom: '1px solid var(--border-subtle)' }}>
                <div className="label-caps">Últimas Vendas Manuais</div>
@@ -115,7 +88,7 @@ export default function Dashboard() {
             </table>
          </div>
 
-         {/* TABELA DE PEDIDOS COMPACTA */}
+         {/* STATUS DE PEDIDOS */}
          <div className="premium-table-wrap">
             <div style={{ padding: '16px 20px', background: '#050505', borderBottom: '1px solid var(--border-subtle)' }}>
                <div className="label-caps">Status de Pedidos</div>
@@ -123,7 +96,7 @@ export default function Dashboard() {
             <table>
                <thead>
                   <tr>
-                     <th>Identificador</th>
+                     <th>ID</th>
                      <th>Valor</th>
                      <th style={{ textAlign: 'right' }}>Status</th>
                   </tr>
@@ -147,7 +120,6 @@ export default function Dashboard() {
             </table>
          </div>
       </div>
-
     </div>
   )
 }
