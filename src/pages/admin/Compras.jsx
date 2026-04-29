@@ -1,278 +1,165 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { sb } from '../../lib/supabase'
 import { useApp } from '../../context/AppContext'
-import { eKey, fmt } from '../../lib/utils'
-
-// ─── Item de compra ────────────────────────────────────────────────────────────
-function CompraRow({ item, catalogo, produtosDB, estoqueMap, onChange, onRemove }) {
-  const { nome, qtd, custo, precoVenda, puffs, sabores } = item
-
-  const catExiste = catalogo.find(c => c.nome === nome)
-  const saboresExist = [...new Set(
-    produtosDB.filter(p => p.nome === nome).map(p => p.sabor || '').filter(Boolean)
-  )]
-
-  const preenchidos = sabores.filter(s => s.trim()).length
-  const todos = qtd > 0 && preenchidos === qtd
-
-  const handleNome = (v) => {
-    const cat = catalogo.find(c => c.nome === v)
-    const update = { nome: v }
-    if (cat) {
-      if (!puffs) update.puffs = cat.desc || ''
-      if (!precoVenda) update.precoVenda = cat.preco ? cat.preco.toFixed(2) : ''
-    }
-    // regenera sabores com o tamanho atual
-    update.sabores = Array(qtd).fill('').map((_, i) => sabores[i] || '')
-    onChange(update)
-  }
-
-  const handleQtd = (v) => {
-    const n = parseInt(v) || 0
-    onChange({
-      qtd: n,
-      sabores: Array(n).fill('').map((_, i) => sabores[i] || ''),
-    })
-  }
-
-  const handleSabor = (i, v) => {
-    const next = [...sabores]
-    next[i] = v
-    onChange({ sabores: next })
-  }
-
-  return (
-    <div className="compra-row">
-      {/* Linha principal */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 0.8fr 1fr 1fr auto', gap: 10, alignItems: 'end' }}>
-        <div className="form-group">
-          <label>Produto (modelo)</label>
-          <input
-            list={`ml-${item.id}`}
-            type="text"
-            placeholder="Ex: V80 Ignite, Elfbar..."
-            autoComplete="off"
-            value={nome}
-            onChange={e => handleNome(e.target.value)}
-          />
-          <datalist id={`ml-${item.id}`}>
-            {catalogo.map(c => <option key={c.linha} value={c.nome} />)}
-          </datalist>
-        </div>
-        <div className="form-group">
-          <label>Qtd total</label>
-          <input type="number" min="1" placeholder="0" value={qtd || ''}
-            onChange={e => handleQtd(e.target.value)} />
-        </div>
-        <div className="form-group">
-          <label>Custo unit. (R$)</label>
-          <input type="number" step="0.01" placeholder="0,00" value={custo}
-            onChange={e => onChange({ custo: e.target.value })} />
-        </div>
-        <div className="form-group">
-          <label>Preço venda (R$) <small style={{ color: 'var(--muted)', fontSize: 10 }}>— vitrine</small></label>
-          <input type="number" step="0.01" placeholder="90,00" value={precoVenda}
-            onChange={e => onChange({ precoVenda: e.target.value })} />
-        </div>
-        <button className="btn-remove" style={{ alignSelf: 'flex-end' }} onClick={onRemove}>✕</button>
-      </div>
-
-      {/* Linha extra: puffs */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10, marginTop: 8 }}>
-        <div className="form-group">
-          <label>Puffs <small style={{ color: 'var(--muted)', fontSize: 10 }}>— obrigatório para novos modelos</small></label>
-          <input type="text" placeholder="Ex: 8.000 puffs, 15.000 puffs..." value={puffs}
-            onChange={e => onChange({ puffs: e.target.value })} />
-        </div>
-      </div>
-
-      {/* Campos de sabor individuais */}
-      {qtd > 0 && nome && (
-        <div style={{ marginTop: 10 }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            Sabores por unidade
-            <span style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 600, padding: '2px 8px', background: 'rgba(0,212,255,.1)', borderRadius: 20 }}>
-              1 sabor por unidade
-            </span>
-          </label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {sabores.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 11, color: 'var(--muted)', minWidth: 22, textAlign: 'right', flexShrink: 0 }}>{i + 1}.</span>
-                <input
-                  list={`sl-${item.id}`}
-                  type="text"
-                  placeholder="Ex: Blueberry Lemon, Watermelon Ice..."
-                  value={s}
-                  onChange={e => handleSabor(i, e.target.value)}
-                  autoComplete="off"
-                  style={{ flex: 1 }}
-                />
-              </div>
-            ))}
-            <datalist id={`sl-${item.id}`}>
-              {saboresExist.map(s => <option key={s} value={s} />)}
-            </datalist>
-          </div>
-        </div>
-      )}
-
-      {/* Info de progresso */}
-      <div style={{
-        marginTop: 6, fontSize: 11, padding: '4px 10px',
-        background: 'rgba(255,255,255,.03)', borderRadius: 6,
-        color: todos ? 'var(--green)' : 'var(--muted)',
-      }}>
-        {!nome || !qtd
-          ? '📦 Selecione modelo e quantidade para ver os campos de sabor'
-          : todos
-            ? `✅ Todos os ${qtd} sabores preenchidos para "${nome}"`
-            : `📦 ${preenchidos}/${qtd} sabores preenchidos para "${nome}"`}
-      </div>
-    </div>
-  )
-}
-
-// ─── Compras page ──────────────────────────────────────────────────────────────
-let nextId = 1
-const newItem = () => ({
-  id: nextId++, nome: '', qtd: 0, custo: '', precoVenda: '', puffs: '', sabores: [],
-})
 
 export default function Compras() {
-  const { catalogo, produtosDB, estoqueMap, carregarProdutos, setCatalogo, setConfigData, toast } = useApp()
-  const [itens, setItens]   = useState([newItem()])
-  const [frete, setFrete]   = useState('')
+  const { toast } = useApp()
+  const [modelos, setModelos] = useState([])
+  const [itens, setItens]     = useState([{ modelo: '', puffs: '', preco: '', custo: '', qty: 1, sabores: [''] }])
+  const [frete, setFrete]     = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const updateItem = (id, patch) => {
-    setItens(prev => prev.map(it => it.id === id ? { ...it, ...patch } : it))
-  }
-  const removeItem = (id) => setItens(prev => prev.filter(it => it.id !== id))
-  const addItem    = () => setItens(prev => [...prev, newItem()])
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await sb.from('produtos').select('nome, puffs, preco_venda').order('nome')
+      const unique = []
+      const names = new Set()
+      data?.forEach(p => {
+        if (!names.has(p.nome)) {
+          names.add(p.nome)
+          unique.push(p)
+        }
+      })
+      setModelos(unique)
+    }
+    load()
+  }, [])
 
-  const totalQtd = itens.reduce((a, it) => a + (parseInt(it.qtd) || 0), 0)
-  const totalVal = itens.reduce((a, it) =>
-    a + (parseFloat(it.custo) || 0) * (parseInt(it.qtd) || 0), 0
-  ) + (parseFloat(frete) || 0)
+  const addRow = () => setItens([...itens, { modelo: '', puffs: '', preco: '', custo: '', qty: 1, sabores: [''] }])
+  const rmRow  = (idx) => setItens(itens.filter((_, i) => i !== idx))
+
+  const updateItem = (idx, field, val) => {
+    const next = [...itens]
+    next[idx][field] = val
+    if (field === 'modelo') {
+      const mod = modelos.find(m => m.nome === val)
+      if (mod) {
+        next[idx].puffs = mod.puffs
+        next[idx].preco = mod.preco_venda
+      }
+    }
+    if (field === 'qty') {
+      const q = parseInt(val) || 0
+      next[idx].sabores = Array(q).fill('')
+    }
+    setItens(next)
+  }
+
+  const updateSabor = (iIdx, sIdx, val) => {
+    const next = [...itens]
+    next[iIdx].sabores[sIdx] = val
+    setItens(next)
+  }
+
+  const totalCompra = itens.reduce((a, i) => a + (parseFloat(i.custo) || 0) * (parseInt(i.qty) || 0), 0) + (parseFloat(frete) || 0)
 
   const registrar = async () => {
+    if (itens.some(i => !i.modelo || !i.custo || !i.qty)) return toast('Preencha todos os campos obrigatórios', '⚠️')
     setLoading(true)
-    const freteVal = parseFloat(frete) || 0
-    const nomes = []
-    let totalCompra = 0
 
-    for (const item of itens) {
-      const { nome, qtd: qtdRaw, puffs, sabores } = item
-      const qtd = parseInt(qtdRaw) || 0
-      const custo = parseFloat(item.custo) || 0
-      const precoVenda = parseFloat(item.precoVenda) || 0
-      if (!nome || !qtd || !custo) continue
-
-      // Valida sabores
-      const naoPreenchidos = sabores.filter(s => !s.trim()).length
-      if (naoPreenchidos > 0) {
-        toast(`Preencha todos os ${qtd} sabores de "${nome}"`, '⚠️')
-        setLoading(false); return
+    try {
+      for (const item of itens) {
+        const proms = item.sabores.map(sabor => 
+          sb.from('produtos').insert({
+            nome: item.modelo,
+            puffs: item.puffs,
+            preco_venda: item.preco,
+            custo_unitario: item.custo,
+            sabor: sabor.trim() || 'Sem Sabor',
+            quantidade: 1,
+            linha: item.modelo.toLowerCase().replace(/\s+/g, '-')
+          })
+        )
+        await Promise.all(proms)
       }
-
-      const freteUnit = totalQtd > 0 ? freteVal / totalQtd : 0
-      const custoFinal = custo + freteUnit
-
-      // Gerencia catálogo
-      const linhaKey = nome.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
-      const catExiste = catalogo.find(c => c.nome === nome)
-
-      if (!catExiste) {
-        if (!puffs) { toast(`Informe os Puffs do novo modelo "${nome}"`, '⚠️'); setLoading(false); return }
-        const precoFinal = precoVenda > 0 ? precoVenda : 90.00
-        setCatalogo(prev => [...prev, { linha: linhaKey, nome, desc: puffs, emoji: '💨', preco: precoFinal }])
-        await sb.from('config').upsert({ chave: `desc:${linhaKey}`, valor: puffs }, { onConflict: 'chave' })
-        await sb.from('config').upsert({ chave: `preco:${linhaKey}`, valor: precoFinal }, { onConflict: 'chave' })
-        setConfigData(prev => ({ ...prev, [`desc:${linhaKey}`]: puffs, [`preco:${linhaKey}`]: precoFinal }))
-      } else {
-        if (precoVenda > 0) {
-          setCatalogo(prev => prev.map(c => c.nome === nome ? { ...c, preco: precoVenda } : c))
-          await sb.from('config').upsert({ chave: catExiste.linha, valor: precoVenda }, { onConflict: 'chave' })
-        }
-        if (puffs) {
-          setCatalogo(prev => prev.map(c => c.nome === nome ? { ...c, desc: puffs } : c))
-          await sb.from('config').upsert({ chave: `desc:${catExiste.linha}`, valor: puffs }, { onConflict: 'chave' })
-        }
-      }
-
-      // Agrupa sabores iguais
-      const contagem = {}
-      sabores.forEach(s => { contagem[s] = (contagem[s] || 0) + 1 })
-
-      // Upsert estoque (busca fresco para evitar race condition)
-      const { data: prodsAtuais } = await sb.from('produtos').select('*').eq('nome', nome)
-      for (const [sabor, qtdSabor] of Object.entries(contagem)) {
-        const existing = (prodsAtuais || []).find(p => (p.sabor || '') === sabor)
-        if (existing) {
-          await sb.from('produtos').update({ quantidade: existing.quantidade + qtdSabor, custo: custoFinal }).eq('id', existing.id)
-        } else {
-          await sb.from('produtos').insert({ nome, sabor, quantidade: qtdSabor, custo: custoFinal })
-        }
-        nomes.push(`${nome} · ${sabor} (${qtdSabor}x)`)
-      }
-      totalCompra += custoFinal * qtd
+      await sb.from('historico').insert({ tipo: 'Compra', valor: totalCompra, descricao: `Entrada de ${itens.length} modelos` })
+      toast('Estoque atualizado com sucesso!', '✅')
+      setItens([{ modelo: '', puffs: '', preco: '', custo: '', qty: 1, sabores: [''] }])
+      setFrete(0)
+    } catch (e) {
+      toast('Erro ao registrar compra', '❌')
+    } finally {
+      setLoading(false)
     }
-
-    if (!nomes.length) { toast('Preencha pelo menos um item completo', '⚠️'); setLoading(false); return }
-
-    await sb.from('historico').insert({ tipo: 'Compra', descricao: nomes.join(', '), valor: totalCompra })
-    await carregarProdutos()
-
-    toast('✅ Compra registrada! Estoque e vitrine atualizados.')
-    setItens([newItem()])
-    setFrete('')
-    setLoading(false)
   }
 
   return (
-    <div className="container">
-      <h2 className="section-title">Registrar compra</h2>
-      <div className="card" style={{ maxWidth: 900 }}>
-        <p style={{ color: 'var(--muted)', fontSize: 13, margin: '0 0 16px', lineHeight: 1.6 }}>
-          Selecione o <strong style={{ color: 'var(--text)' }}>modelo</strong> e a <strong style={{ color: 'var(--text)' }}>quantidade</strong> — os campos de sabor aparecem automaticamente (1 por unidade). Puffs e preço são preenchidos automaticamente para modelos já cadastrados.
-        </p>
+    <div className="admin-wrapper" style={{ animation: 'fadeIn 0.5s ease-out' }}>
+      <div style={{ marginBottom: 40 }}>
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: '#000', letterSpacing: '-0.02em' }}>Registrar Entrada</h1>
+        <p style={{ color: '#888', fontSize: 14 }}>Adicione novos produtos ao inventário e atualize o custo operacional.</p>
+      </div>
 
-        {itens.map(item => (
-          <CompraRow
-            key={item.id}
-            item={item}
-            catalogo={catalogo}
-            produtosDB={produtosDB}
-            estoqueMap={estoqueMap}
-            onChange={patch => updateItem(item.id, patch)}
-            onRemove={() => removeItem(item.id)}
-          />
-        ))}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 32, alignItems: 'start' }}>
+        
+        <div>
+          {itens.map((item, idx) => (
+            <div key={idx} className="item-row-card">
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 16, marginBottom: 20 }}>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Modelo / Produto</label>
+                  <input list="models" value={item.modelo} onChange={e => updateItem(idx, 'modelo', e.target.value)} placeholder="Ex: V80 Ignite" />
+                  <datalist id="models">
+                    {modelos.map(m => <option key={m.nome} value={m.nome} />)}
+                  </datalist>
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Qtd Total</label>
+                  <input type="number" value={item.qty} onChange={e => updateItem(idx, 'qty', e.target.value)} />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Custo Unit. (R$)</label>
+                  <input type="number" value={item.custo} onChange={e => updateItem(idx, 'custo', e.target.value)} placeholder="0,00" />
+                </div>
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label>Preço Venda (R$)</label>
+                  <input type="number" value={item.preco} onChange={e => updateItem(idx, 'preco', e.target.value)} />
+                </div>
+              </div>
 
-        <button className="btn-ghost" onClick={addItem} style={{ marginTop: 4 }}>+ Adicionar item</button>
-        <div className="divider" />
+              <div className="form-group" style={{ marginBottom: 20 }}>
+                <label>Puffs (Capacidade)</label>
+                <input value={item.puffs} onChange={e => updateItem(idx, 'puffs', e.target.value)} placeholder="Ex: 8.000 puffs" />
+              </div>
 
-        <div className="form-grid fg-2">
-          <div className="form-group">
-            <label>Frete total (R$)</label>
-            <input type="number" step="0.01" placeholder="0,00" value={frete}
-              onChange={e => setFrete(e.target.value)} />
-          </div>
-          <div className="stat-card" style={{ background: 'var(--surface2)', padding: '14px 18px' }}>
-            <div className="stat-title">Total da compra</div>
-            <div className="stat-value" style={{ fontSize: 20 }}>R$ {fmt(totalVal)}</div>
-            <div className="stat-sub">
-              Você · R${fmt(totalVal / 2)} &nbsp;|&nbsp; Sócio · R${fmt(totalVal / 2)}
+              <div style={{ background: '#f8f9fa', padding: 20, borderRadius: 12 }}>
+                <label style={{ fontSize: 10, fontWeight: 800, color: '#999', display: 'block', marginBottom: 12 }}>SABORES POR UNIDADE</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  {item.sabores.map((s, sIdx) => (
+                    <input key={sIdx} value={s} onChange={e => updateSabor(idx, sIdx, e.target.value)} placeholder={`Sabor item ${sIdx + 1}`} style={{ background: '#fff', fontSize: 12, padding: '10px' }} />
+                  ))}
+                </div>
+              </div>
+
+              {itens.length > 1 && (
+                <button onClick={() => rmRow(idx)} style={{ position: 'absolute', top: 20, right: 20, background: 'none', border: 'none', color: '#ff4d4d', cursor: 'pointer', fontWeight: 800 }}>REMOVER</button>
+              )}
             </div>
-          </div>
-        </div>
+          ))}
 
-        <div className="btn-row">
-          <button className="btn-primary" onClick={registrar} disabled={loading}>
-            {loading ? 'Registrando...' : 'Registrar compra ✓'}
+          <button className="btn-action" onClick={addRow} style={{ marginTop: 8 }}>
+             <span>+</span> ADICIONAR OUTRO MODELO
           </button>
         </div>
+
+        <div className="stat-card-premium" style={{ position: 'sticky', top: 100 }}>
+          <div className="stat-label">Resumo da Operação</div>
+          
+          <div className="form-group" style={{ marginTop: 24 }}>
+            <label>Custo de Frete (R$)</label>
+            <input type="number" value={frete} onChange={e => setFrete(e.target.value)} />
+          </div>
+
+          <div style={{ marginTop: 32, padding: '24px 0', borderTop: '1px solid #eee' }}>
+            <div style={{ fontSize: 12, color: '#888', marginBottom: 8, fontWeight: 600 }}>INVESTIMENTO TOTAL</div>
+            <div className="stat-main-val" style={{ fontSize: 32 }}>R$ {totalCompra.toFixed(2).replace('.', ',')}</div>
+          </div>
+
+          <button className="btn-primary" style={{ width: '100%', marginTop: 20 }} disabled={loading} onClick={registrar}>
+            {loading ? 'PROCESSANDO...' : 'REGISTRAR COMPRA ✓'}
+          </button>
+        </div>
+
       </div>
     </div>
   )
