@@ -39,24 +39,24 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
   const countSel = Object.keys(selecionados).length
 
   return (
-    <div className="pod-card">
-      <div className="pod-visual">
-        <div className="pod-emoji-big">{cat.emoji}</div>
-        <div className="pod-tag" style={{ background: temEstoque ? 'var(--wp-yellow)' : '#52525b', color: '#000' }}>
-          {temEstoque ? 'ACTIVE_STOCK' : 'DEPLETED'}
+    <div className="product-card">
+      <div className="product-image">
+        <div style={{ filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.2))' }}>{cat.emoji}</div>
+        <div className={`badge ${temEstoque ? 'badge-success' : 'badge-warning'}`} style={{ position: 'absolute', top: 20, right: 20 }}>
+          {temEstoque ? 'EM ESTOQUE' : 'ESGOTADO'}
         </div>
       </div>
 
-      <div className="pod-card-body">
-        <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--text-dark)', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>{cat.linha} Edition</div>
-        <div className="pod-name">{cat.nome}</div>
-        <div style={{ color: 'var(--text-dim)', fontSize: 14, marginBottom: 24 }}>{cat.desc}</div>
+      <div className="product-info">
+        <div style={{ fontSize: 11, fontWeight: 900, color: 'var(--text-dim)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>Linha {cat.linha}</div>
+        <h3 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>{cat.nome}</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>{cat.desc}</p>
         
-        <div className="pod-price">R$ {cat.preco.toFixed(2).replace('.', ',')}</div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-main)' }}>R$ {cat.preco.toFixed(2).replace('.', ',')}</div>
 
-        <div style={{ marginTop: 32 }}>
-          <span className="flavor-label">Select Flavor Node</span>
-          <div className="flavor-chips" style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ marginTop: 24 }}>
+          <span style={{ display: 'block', fontSize: 11, fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 12 }}>Sabores Disponíveis</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {itens.map(p => (
               <div key={p.id} 
                 className={`fchip${selecionados[p.sabor] ? ' sel' : ''}`} 
@@ -65,16 +65,15 @@ const PodCard = memo(function PodCard({ cat, produtosDB, estoqueMap, cart, onAdd
                 {p.sabor}
               </div>
             ))}
-            {!temEstoque && <div className="fchip" style={{ opacity: 0.3, cursor: 'not-allowed' }}>Unavailabe</div>}
           </div>
         </div>
 
-        <div style={{ marginTop: 40 }}>
-          <button className="btn-ultimate" style={{ width: '100%', height: '60px' }} 
+        <div style={{ marginTop: 32 }}>
+          <button className="btn-primary" style={{ width: '100%', height: '52px', fontSize: '14px' }} 
             disabled={countSel === 0} 
             onClick={handleAddToCart}
           >
-            {countSel === 0 ? 'CONFIGURE FLAVOR' : `ADD ${countSel} TO ORDER`}
+            {countSel === 0 ? 'SELECIONE O SABOR' : `ADICIONAR ${countSel} AO CARRINHO`}
           </button>
         </div>
       </div>
@@ -87,30 +86,30 @@ function CartBar({ cart, onCheckout }) {
   const count = cart.reduce((a, i) => a + i.qty, 0)
   if (count === 0) return null
   return (
-    <div style={{ position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)', zIndex: 1100, width: '90%', maxWidth: 600 }}>
+    <div style={{ position: 'fixed', bottom: 30, left: '50%', transform: 'translateX(-50%)', zIndex: 1100, width: 'auto', minWidth: 400 }}>
       <div style={{ 
-        background: 'rgba(9,9,11,0.8)', 
-        backdropFilter: 'blur(24px)', 
-        border: '1px solid var(--border-gold)', 
-        borderRadius: '30px', 
-        padding: '20px 40px', 
-        boxShadow: '0 30px 60px rgba(0,0,0,0.8)', 
+        background: '#111827', 
+        border: '1px solid var(--wp-yellow)', 
+        borderRadius: '16px', 
+        padding: '16px 32px', 
+        boxShadow: '0 20px 40px rgba(0,0,0,0.2)', 
         display: 'flex', 
         justifyContent: 'space-between', 
-        alignItems: 'center' 
+        alignItems: 'center',
+        gap: 40
       }}>
         <div style={{ display: 'flex', gap: 32 }}>
            <div>
-              <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-dark)', textTransform: 'uppercase' }}>Items</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: '#FFF' }}>{count}</div>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase' }}>Itens</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: '#FFF' }}>{count}</div>
            </div>
            <div>
-              <div style={{ fontSize: 10, fontWeight: 900, color: 'var(--text-dark)', textTransform: 'uppercase' }}>Subtotal</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {total.toFixed(2).replace('.', ',')}</div>
+              <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase' }}>Subtotal</div>
+              <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--wp-yellow)' }}>R$ {total.toFixed(2).replace('.', ',')}</div>
            </div>
         </div>
-        <button className="btn-ultimate" style={{ padding: '12px 28px', fontSize: 12 }} onClick={onCheckout}>
-          INIT_ORDER_FLOW →
+        <button className="btn-primary" style={{ padding: '10px 20px' }} onClick={onCheckout}>
+          FINALIZAR PEDIDO →
         </button>
       </div>
     </div>
@@ -122,85 +121,47 @@ export default function Vitrine() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark')
+    document.documentElement.setAttribute('data-theme', 'light') // Voltando para light como base do design novo
   }, [])
 
   const scrollTo = (linha) => {
     const el = document.getElementById(`pc-${linha}`)
     if (el) {
-      const offset = 120
-      const bodyRect = document.body.getBoundingClientRect().top
-      const elementRect = el.getBoundingClientRect().top
-      const elementPosition = elementRect - bodyRect
-      const offsetPosition = elementPosition - offset
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+      window.scrollTo({ top: el.offsetTop - 100, behavior: 'smooth' })
     }
   }
 
   return (
-    <div style={{ background: 'var(--bg-deep)', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg-app)', minHeight: '100vh' }}>
       <Header showAdminBtn />
 
-      <div className="vitrine-shell">
-        <aside className="vitrine-sidebar">
-          <div style={{ flex: 1 }}>
-            <div className="vsidebar-cat-title">Catalogue Nodes</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 24 }}>
-              {catalogo.map((cat) => {
-                const count = produtosDB.filter(p => p.nome === cat.nome && (p.quantidade || 0) > 0).length
-                return (
-                  <div key={cat.linha} className="vsidebar-item" onClick={() => scrollTo(cat.linha)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      <span style={{ fontSize: 20 }}>{cat.emoji}</span> {cat.nome}
-                    </div>
-                    {count > 0 && <span className="vsidebar-badge">{count}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-          
-          <div style={{ marginTop: 40, padding: 24, background: 'rgba(255,255,255,0.02)', borderRadius: 20, border: '1px solid var(--border)' }}>
-            <div className="vsidebar-cat-title" style={{ marginBottom: 16 }}>Direct Access</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <a href={`https://wa.me/${WA_DIEGO}`} target="_blank" rel="noreferrer" style={{ color: 'var(--text-dim)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-                 <div style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' }}></div> Diego_Ops
-              </a>
-              <a href={`https://wa.me/${WA_LUCAS}`} target="_blank" rel="noreferrer" style={{ color: 'var(--text-dim)', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 12 }}>
-                 <div style={{ width: 8, height: 8, background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' }}></div> Lucas_Log
-              </a>
-            </div>
-          </div>
-        </aside>
+      <div className="store-container">
+        <div style={{ marginBottom: 64, textAlign: 'center' }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--wp-yellow-dark)', letterSpacing: '0.2em', marginBottom: 16, textTransform: 'uppercase' }}>WavePod Official Store</div>
+          <h1 style={{ fontSize: 48, fontWeight: 900, letterSpacing: '-0.02em', marginBottom: 16 }}>Catálogo de <span style={{ color: 'var(--wp-yellow-dark)' }}>Pods Premium</span></h1>
+          <p style={{ maxWidth: 700, margin: '0 auto', color: 'var(--text-muted)', fontSize: 18 }}>Os melhores descartáveis do mercado com entrega imediata e garantia de autenticidade.</p>
+        </div>
 
-        <main className="vitrine-main">
-          <div className="vitrine-hero">
-            <div style={{ fontSize: 12, fontWeight: 900, color: 'var(--wp-yellow)', letterSpacing: '0.4em', marginBottom: 24, textTransform: 'uppercase' }}>Authentic_Vaporizers_Node</div>
-            <h1>Premium <span style={{ color: 'var(--wp-yellow)' }}>Disposable</span><br/>Pods Catalog</h1>
-            <p style={{ maxWidth: 600, marginTop: 24, color: 'var(--text-dim)', fontSize: 18, lineHeight: 1.6 }}>The definitive collection of elite vaporizers. Engineering quality, express logistics, and the most exclusive flavors in the territory.</p>
-          </div>
-
-          <div className="catalog-wrap">
-            {loading ? (
-              <div style={{ padding: 100, textAlign: 'center' }}>
-                <div className="loader" style={{ margin: '0 auto' }}></div>
-                <div style={{ marginTop: 20, fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-dark)', letterSpacing: '0.2em' }}>SYNCING_INVENTORY...</div>
+        <div className="product-grid">
+          {loading ? (
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 100 }}>
+              <div className="loader" style={{ margin: '0 auto' }}></div>
+              <div style={{ marginTop: 20, fontWeight: 700, color: 'var(--text-muted)' }}>SINCRONIZANDO ESTOQUE...</div>
+            </div>
+          ) : (
+            catalogo.map(cat => (
+              <div key={cat.linha} id={`pc-${cat.linha}`}>
+                <PodCard
+                  cat={cat}
+                  produtosDB={produtosDB}
+                  estoqueMap={estoqueMap}
+                  cart={cart}
+                  onAddToCart={addToCart}
+                />
               </div>
-            ) : (
-              catalogo.map(cat => (
-                <div key={cat.linha} id={`pc-${cat.linha}`}>
-                  <PodCard
-                    cat={cat}
-                    produtosDB={produtosDB}
-                    estoqueMap={estoqueMap}
-                    cart={cart}
-                    onAddToCart={addToCart}
-                  />
-                </div>
-              ))
-            )}
-          </div>
-        </main>
+            ))
+          )}
+        </div>
       </div>
 
       <CartBar cart={cart} onCheckout={() => navigate('/checkout')} />

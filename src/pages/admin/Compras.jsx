@@ -41,41 +41,41 @@ export default function Compras() {
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800 }}>Supply Chain Management</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Inventory inbound processing and cost tracking.</p>
+        <h1 style={{ fontSize: 24, fontWeight: 800 }}>Gestão de Suprimentos</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Processamento de entrada de estoque e controle de custos.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 24, alignItems: 'start' }}>
         
         <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Inbound Entry</h3>
+          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Entrada de Lote</h3>
           <form onSubmit={handleCompra}>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Resource Node</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Recurso / Modelo</label>
               <select className="input-field" value={form.produtoId} onChange={e => setForm({...form, produtoId: e.target.value})}>
-                <option value="">— SELECT_RESOURCE —</option>
+                <option value="">— SELECIONE —</option>
                 {produtos.map(p => <option key={p.id} value={p.id}>{p.nome} {p.sabor}</option>)}
               </select>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-              <div><label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Units</label><input type="number" className="input-field" value={form.quantidade} onChange={e => setForm({...form, quantidade: e.target.value})} /></div>
-              <div><label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Cost Un.</label><input type="number" step="0.01" className="input-field" value={form.custo} onChange={e => setForm({...form, custo: e.target.value})} /></div>
+              <div><label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Qtd</label><input type="number" className="input-field" value={form.quantidade} onChange={e => setForm({...form, quantidade: e.target.value})} /></div>
+              <div><label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Custo Un.</label><input type="number" step="0.01" className="input-field" value={form.custo} onChange={e => setForm({...form, custo: e.target.value})} /></div>
             </div>
             <div style={{ marginBottom: 24 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Freight Cost (R$)</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Valor do Frete (R$)</label>
               <input type="number" step="0.01" className="input-field" value={form.frete} onChange={e => setForm({...form, frete: e.target.value})} />
             </div>
             <button className="btn-primary" style={{ width: '100%', padding: 12, background: '#111827', color: '#FFF' }} disabled={loading}>
-              {loading ? 'PROCESSING...' : 'CONFIRM_INBOUND'}
+              {loading ? 'PROCESSANDO...' : 'CONFIRMAR ENTRADA'}
             </button>
           </form>
         </div>
 
         <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
-          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Historical Log</h3>
+          <h3 style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: 20 }}>Log de Aquisições</h3>
           <table className="data-table">
             <thead>
-              <tr><th>Resource</th><th>Batch Size</th><th>Unit Cost</th><th>Freight</th><th>Exposure</th></tr>
+              <tr><th>Produto</th><th>Lote</th><th>Custo Un.</th><th>Frete</th><th>Total</th></tr>
             </thead>
             <tbody>
               {compras.slice(0, 15).map(c => (

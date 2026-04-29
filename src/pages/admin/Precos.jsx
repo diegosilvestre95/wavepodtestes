@@ -48,17 +48,17 @@ export default function Precos() {
     }
   }
 
-  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SYNCING_PRICE_TABLE...</div>
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SINCRONIZANDO TABELA...</div>
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Pricing Matrix</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Global value configuration for online assets.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Matriz de Precificação</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Configuração global de valores para o catálogo online.</p>
         </div>
         <button className="btn-primary" onClick={salvarModelos} style={{ padding: '10px 24px' }}>
-           SAVE_ADJUSTMENTS ✓
+           SALVAR AJUSTES ✓
         </button>
       </div>
 
@@ -68,7 +68,7 @@ export default function Precos() {
            <input 
              className="input-field" 
              style={{ border: 'none', background: 'transparent', width: 300, padding: 0 }}
-             placeholder="Search by model name..." 
+             placeholder="Buscar por modelo (Ex: Ignite, Oxbar...)" 
              value={busca}
              onChange={e => setBusca(e.target.value)}
            />
@@ -77,9 +77,9 @@ export default function Precos() {
         <table className="data-table" style={{ border: 'none' }}>
           <thead>
             <tr>
-              <th>Resource Model</th>
-              <th>Current Volume</th>
-              <th style={{ textAlign: 'right' }}>Active Unit Price (R$)</th>
+              <th>Modelo do Recurso</th>
+              <th>Volume Vinculado</th>
+              <th style={{ textAlign: 'right' }}>Preço de Venda Ativo (R$)</th>
             </tr>
           </thead>
           <tbody>
@@ -88,7 +88,7 @@ export default function Precos() {
                 <td style={{ fontWeight: 700, fontSize: 14 }}>{m.nome}</td>
                 <td>
                    <span className={`badge ${m.total_estoque > 0 ? 'badge-success' : 'badge-warning'}`}>
-                     {m.total_estoque} UNITS_LINKED
+                     {m.total_estoque} UNIDADES
                    </span>
                 </td>
                 <td style={{ textAlign: 'right' }}>

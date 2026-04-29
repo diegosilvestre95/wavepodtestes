@@ -16,7 +16,7 @@ export default function Dashboard() {
       ])
       setData({ vendas: v.data || [], compras: c.data || [], pedidos: p.data || [] })
     } catch (err) {
-      console.error("Dashboard Load Failure:", err)
+      console.error("Falha ao carregar dashboard:", err)
     }
     setLoading(false)
   }
@@ -31,36 +31,36 @@ export default function Dashboard() {
     return { investido, faturamento, lucro: faturamento - investido }
   }, [data])
 
-  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SYNCING_SYSTEM_DATA...</div>
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SINCRONIZANDO DADOS...</div>
 
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800 }}>Analytical Overview</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Enterprise-level operational and financial metrics.</p>
+        <h1 style={{ fontSize: 24, fontWeight: 800 }}>Visão Analítica</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Métricas operacionais e financeiras em tempo real.</p>
       </div>
 
       {/* 📊 KPI ROW (4 CARDS) */}
       <div className="dashboard-grid">
         <div className="kpi-card">
-          <div className="kpi-title">Capital Invested</div>
+          <div className="kpi-title">Capital Investido</div>
           <div className="kpi-value">R$ {fmt(stats.investido)}</div>
-          <div className="kpi-trend" style={{ color: 'var(--text-muted)' }}>Inventory Exposure</div>
+          <div className="kpi-trend" style={{ color: 'var(--text-muted)' }}>Exposição em Estoque</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-title">Gross Revenue</div>
+          <div className="kpi-title">Faturamento Bruto</div>
           <div className="kpi-value">R$ {fmt(stats.faturamento)}</div>
-          <div className="kpi-trend" style={{ color: '#16a34a' }}>+12.5% vs Last Period</div>
+          <div className="kpi-trend" style={{ color: '#16a34a' }}>Vendas + Pedidos Confirmados</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-title">Net Profit</div>
+          <div className="kpi-title">Lucro Líquido</div>
           <div className="kpi-value" style={{ color: 'var(--wp-yellow-dark)' }}>R$ {fmt(stats.lucro)}</div>
-          <div className="kpi-trend" style={{ color: '#16a34a' }}>Performance Optimal</div>
+          <div className="kpi-trend" style={{ color: '#16a34a' }}>Performance Operacional</div>
         </div>
         <div className="kpi-card">
-          <div className="kpi-title">Partner Yield</div>
+          <div className="kpi-title">Rendimento Sócios</div>
           <div className="kpi-value">R$ {fmt(stats.lucro / 2)}</div>
-          <div className="kpi-trend">Fixed 50/50 Split</div>
+          <div className="kpi-trend">Divisão Fixa 50/50</div>
         </div>
       </div>
 
@@ -70,16 +70,16 @@ export default function Dashboard() {
         {/* RECENT SALES (DENSE TABLE) */}
         <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-             <h3 style={{ fontSize: 14, fontWeight: 700 }}>Operation Log</h3>
-             <button className="btn-outline" style={{ padding: '4px 10px', fontSize: 10 }}>VIEW_ALL</button>
+             <h3 style={{ fontSize: 14, fontWeight: 700 }}>Log de Operações</h3>
+             <button className="btn-outline" style={{ padding: '4px 10px', fontSize: 10 }}>VER TUDO</button>
           </div>
           
           <table className="data-table">
             <thead>
               <tr>
-                <th>Resource Node</th>
-                <th>Volume</th>
-                <th>Yield</th>
+                <th>Produto</th>
+                <th>Qtd</th>
+                <th>Valor Un.</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -92,7 +92,7 @@ export default function Dashboard() {
                   </td>
                   <td>{v.quantidade} <small>UN</small></td>
                   <td style={{ fontWeight: 700 }}>R$ {fmt(v.preco_venda)}</td>
-                  <td><span className="badge badge-success">COMPLETED</span></td>
+                  <td><span className="badge badge-success">CONCLUÍDO</span></td>
                 </tr>
               ))}
             </tbody>
@@ -101,12 +101,12 @@ export default function Dashboard() {
 
         {/* PIPELINE (DENSE LIST) */}
         <div style={{ background: '#FFF', padding: 24, border: '1px solid var(--border)', borderRadius: 6 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 20 }}>Request Pipeline</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 20 }}>Fila de Pedidos</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {data.pedidos.slice(0, 8).map(p => (
               <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #F3F4F6' }}>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700 }}>{p.cliente_nome}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700 }}>{p.cliente_nome} {p.cliente_sobrenome}</div>
                   <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>#{String(p.id).slice(-6).toUpperCase()}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -116,7 +116,7 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <button className="btn-primary" style={{ width: '100%', marginTop: 20 }}>MANAGE_PIPELINE</button>
+          <button className="btn-primary" style={{ width: '100%', marginTop: 20 }}>GERENCIAR PEDIDOS</button>
         </div>
 
       </div>

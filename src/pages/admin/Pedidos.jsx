@@ -30,29 +30,29 @@ export default function Pedidos() {
   const updateStatus = async (id, status) => {
     const { error } = await sb.from('pedidos').update({ status }).eq('id', id)
     if (!error) {
-      toast(`Order ${status}!`, '✅')
+      toast(`Pedido ${status}!`, '✅')
       carregar()
     }
   }
 
-  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SYNCING_REQUEST_QUEUE...</div>
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>SINCRONIZANDO FILA DE PEDIDOS...</div>
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Request Processing</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Operational queue for storefront transactions.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Processamento de Pedidos</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Fila operacional das transações originadas na vitrine.</p>
         </div>
         <div style={{ display: 'flex', gap: 12 }}>
            <input 
              className="input-field" 
              style={{ width: 260 }} 
-             placeholder="Search by ID or Client..." 
+             placeholder="Buscar por ID ou Cliente..." 
              value={busca}
              onChange={e => setBusca(e.target.value)}
            />
-           <button onClick={carregar} className="btn-outline" style={{ padding: '0 16px' }}>REFRESH</button>
+           <button onClick={carregar} className="btn-outline" style={{ padding: '0 16px' }}>ATUALIZAR</button>
         </div>
       </div>
 
@@ -60,11 +60,11 @@ export default function Pedidos() {
         <table className="data-table" style={{ border: 'none' }}>
           <thead>
             <tr>
-              <th>Request ID</th>
-              <th>Client Node</th>
-              <th>Financial Volume</th>
-              <th>Status</th>
-              <th style={{ textAlign: 'right' }}>Resolution</th>
+              <th>ID do Pedido</th>
+              <th>Cliente / Nó</th>
+              <th>Volume Financeiro</th>
+              <th>Status Atual</th>
+              <th style={{ textAlign: 'right' }}>Resolução</th>
             </tr>
           </thead>
           <tbody>
@@ -85,8 +85,8 @@ export default function Pedidos() {
                 </td>
                 <td style={{ textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={() => updateStatus(p.id, 'Confirmado')} className="btn-primary" style={{ padding: '4px 10px', fontSize: 10 }}>APPROVE</button>
-                    <button onClick={() => updateStatus(p.id, 'Cancelado')} className="btn-outline" style={{ padding: '4px 10px', fontSize: 10, color: '#DC2626' }}>REJECT</button>
+                    <button onClick={() => updateStatus(p.id, 'Confirmado')} className="btn-primary" style={{ padding: '4px 10px', fontSize: 10 }}>APROVAR</button>
+                    <button onClick={() => updateStatus(p.id, 'Cancelado')} className="btn-outline" style={{ padding: '4px 10px', fontSize: 10, color: '#DC2626' }}>REJEITAR</button>
                   </div>
                 </td>
               </tr>

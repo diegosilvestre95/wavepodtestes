@@ -10,12 +10,12 @@ import Pedidos   from './admin/Pedidos'
 import Logo      from '../components/Logo'
 
 const MENU = [
-  { id: 'dashboard', label: 'Overview', icon: '📊' },
-  { id: 'pedidos',   label: 'Requests', icon: '🛒' },
-  { id: 'vendas',    label: 'Terminal', icon: '💰' },
-  { id: 'compras',   label: 'Purchases', icon: '📥' },
-  { id: 'estoque',   label: 'Inventory', icon: '📦' },
-  { id: 'precos',    label: 'Config', icon: '⚙️' },
+  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { id: 'pedidos',   label: 'Pedidos', icon: '🛒' },
+  { id: 'vendas',    label: 'Terminal Vendas', icon: '💰' },
+  { id: 'compras',   label: 'Entrada Estoque', icon: '📥' },
+  { id: 'estoque',   label: 'Estoque Real', icon: '📦' },
+  { id: 'precos',    label: 'Configurações', icon: '⚙️' },
 ]
 
 export default function Admin() {
@@ -72,7 +72,7 @@ export default function Admin() {
            </div>
            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12, fontWeight: 700 }}>{currentUser?.nome}</div>
-              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Admin Level</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Admin Master</div>
            </div>
            <button onClick={logout} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--text-muted)' }}>
               🚪
@@ -85,7 +85,7 @@ export default function Admin() {
         <header className="stage-header">
            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-dim)', textTransform: 'uppercase' }}>
-                WavePod / {MENU.find(m => m.id === active)?.label}
+                WavePod ERP / {MENU.find(m => m.id === active)?.label}
               </span>
            </div>
 
@@ -93,7 +93,7 @@ export default function Admin() {
               <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                  <span style={{ cursor: 'pointer', fontSize: 14 }}>🔔</span>
                  <div style={{ width: 1, height: 20, background: 'var(--border)' }}></div>
-                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>ID: #7782</span>
+                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>SESSÃO ATIVA</span>
               </div>
            </div>
         </header>

@@ -15,20 +15,20 @@ export default function Estoque() {
     setLoading(false)
   }
 
-  const getSt = (q) => q <= 0 ? { class: 'badge-warning', label: 'DEPLETED' } : q < 5 ? { class: 'badge-warning', label: 'LOW_STOCK' } : { class: 'badge-success', label: 'OPTIMAL' }
+  const getSt = (q) => q <= 0 ? { class: 'badge-warning', label: 'ESGOTADO' } : q < 5 ? { class: 'badge-warning', label: 'BAIXO ESTOQUE' } : { class: 'badge-success', label: 'OTIMIZADO' }
 
-  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>LOADING_INVENTORY...</div>
+  if (loading) return <div style={{ padding: 40, color: 'var(--text-muted)' }}>CARREGANDO INVENTÁRIO...</div>
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Inventory Hub</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Real-time resource node status and valuation.</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800 }}>Hub de Inventário</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Status em tempo real dos nós de estoque e valorização.</p>
         </div>
         <div style={{ display: 'flex', gap: 24, background: '#FFF', padding: '12px 24px', border: '1px solid var(--border)', borderRadius: 6 }}>
            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)' }}>GLOBAL VOLUME</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)' }}>VOLUME GLOBAL</div>
               <div style={{ fontSize: 18, fontWeight: 800 }}>{produtos.reduce((a, b) => a + (b.quantidade || 0), 0)} <span style={{fontSize:10}}>UN</span></div>
            </div>
         </div>
@@ -38,12 +38,12 @@ export default function Estoque() {
         <table className="data-table" style={{ border: 'none' }}>
           <thead>
             <tr>
-              <th>Resource Name</th>
-              <th>Specification</th>
-              <th>Asset Cost</th>
-              <th>Sale Price</th>
-              <th>Current Volume</th>
-              <th>Status Node</th>
+              <th>Modelo / Marca</th>
+              <th>Especificação</th>
+              <th>Custo Ativo</th>
+              <th>Preço de Venda</th>
+              <th>Volume Atual</th>
+              <th>Status do Nó</th>
             </tr>
           </thead>
           <tbody>
