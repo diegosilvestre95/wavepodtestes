@@ -1,98 +1,76 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { sb } from '../../lib/supabase'
 import { fmt } from '../../lib/utils'
 
 export default function Estoque() {
-  const [items, setItems] = useState([])
+  const [produtos, setProdutos] = useState([])
   const [loading, setLoading] = useState(true)
-  const [busca, setBusca] = useState('')
 
-  const carregar = async () => {
+  useEffect(() => { carregarDados() }, [])
+
+  const carregarDados = async () => {
     setLoading(true)
     const { data } = await sb.from('produtos').select('*').order('nome')
-    setItems(data || [])
+    setProdutos(data || [])
     setLoading(false)
   }
 
-  useEffect(() => { carregar() }, [])
-
-  const itensFiltrados = useMemo(() => {
-    return items.filter(i => 
-      i.nome.toLowerCase().includes(busca.toLowerCase()) || 
-      i.sabor?.toLowerCase().includes(busca.toLowerCase())
-    )
-  }, [items, busca])
-
-  const getStatus = (q) => {
-    if (q === 0) return { label: 'ESGOTADO', color: '#ef4444' }
-    if (q <= 3) return { label: 'BAIXO ESTOQUE', color: '#f59e0b' }
-    return { label: 'DISPONÍVEL', color: '#10b981' }
+  const getStatusCor = (qtd) => {
+    if (qtd <= 0) return '#ef4444'
+    if (qtd < 5) return '#f59e0b'
+    return '#10b981'
   }
 
-  if (loading) return <div style={{ padding: 40, color: '#666' }}>Lendo inventário completo...</div>
+  if (loading) return <div style={{ padding: 40, color: '#666', fontSize: 13 }}>Carregando inventário...</div>
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease-out' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
+    <div style={{ animation: 'fadeIn 0.4s ease-out' }}>
+      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <div>
-          <h1 style={{ fontSize: 32, fontWeight: 800 }}>Inventário de Estoque</h1>
-          <p style={{ color: '#666', fontSize: 14 }}>Visão detalhada de ativos e custos operacionais.</p>
+          <h1>Gestão de Estoque</h1>
+          <p className="subtext">Controle em tempo real de ativos e disponibilidade.</p>
         </div>
-        <button className="btn-action" onClick={carregar}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-          Atualizar Dados
-        </button>
+        <div style={{ padding: '8px 16px', background: '#050505', borderRadius: 8, border: '1px solid var(--border-subtle)', fontSize: 12 }}>
+           <span className="label-caps" style={{ marginRight: 8 }}>Total de Itens:</span>
+           <span style={{ fontWeight: 800 }}>{produtos.reduce((a, b) => a + (b.quantidade || 0), 0)} un</span>
+        </div>
       </div>
 
-      <div className="ipad-card" style={{ padding: 0, overflow: 'hidden' }}>
-        {/* BARRA DE BUSCA */}
-        <div style={{ padding: '20px 30px', borderBottom: '1px solid #18181b', display: 'flex', alignItems: 'center', gap: 15 }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input 
-            type="text" 
-            placeholder="Filtrar estoque (Modelo ou Sabor)..." 
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            style={{ background: 'transparent', border: 'none', fontSize: 16, padding: 0, width: '100%', fontWeight: 500 }}
-          />
+      <div className="premium-table-wrap">
+        <div style={{ padding: '16px 20px', background: '#050505', borderBottom: '1px solid var(--border-subtle)' }}>
+           <div className="label-caps">Inventário Geral</div>
         </div>
-
-        <div className="premium-table-wrap" style={{ border: 'none', borderRadius: 0 }}>
-          <table>
-            <thead>
-              <tr>
-                <th style={{ paddingLeft: 30 }}>PRODUTO</th>
-                <th>SABOR</th>
-                <th>QUANTIDADE</th>
-                <th>CUSTO UNIT.</th>
-                <th>VALOR TOTAL</th>
-                <th style={{ textAlign: 'right', paddingRight: 30 }}>STATUS</th>
+        <table>
+          <thead>
+            <tr>
+              <th>Produto / Modelo</th>
+              <th>Sabor</th>
+              <th>Preço Venda</th>
+              <th>Custo Médio</th>
+              <th>Qtd em Mãos</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {produtos.map(p => (
+              <tr key={p.id}>
+                <td style={{ fontWeight: 700 }}>{p.nome}</td>
+                <td style={{ color: '#94a3b8' }}>{p.sabor || '—'}</td>
+                <td style={{ fontWeight: 800 }}>R$ {fmt(p.preco_venda)}</td>
+                <td style={{ color: '#475569' }}>R$ {fmt(p.custo)}</td>
+                <td style={{ fontWeight: 800, fontSize: 15 }}>{p.quantidade} un</td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: getStatusCor(p.quantidade) }}></div>
+                    <span style={{ fontSize: 10, fontWeight: 900, color: getStatusCor(p.quantidade) }}>
+                      {p.quantidade <= 0 ? 'ESGOTADO' : p.quantidade < 5 ? 'BAIXO' : 'OK'}
+                    </span>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {itensFiltrados.map(i => {
-                const st = getStatus(i.quantidade)
-                return (
-                  <tr key={i.id}>
-                    <td style={{ paddingLeft: 30, fontWeight: 700, color: '#fff' }}>{i.nome}</td>
-                    <td style={{ color: '#52525b' }}>{i.sabor}</td>
-                    <td style={{ fontWeight: 800 }}>{i.quantidade} un</td>
-                    <td>R$ {fmt(i.custo)}</td>
-                    <td style={{ fontWeight: 700, color: 'var(--wp-yellow)' }}>R$ {fmt(i.quantidade * i.custo)}</td>
-                    <td style={{ paddingRight: 30 }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <div className="status-pill" style={{ color: st.color }}>
-                          <div className="status-dot" style={{ background: st.color }}></div>
-                          {st.label}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
