@@ -12,61 +12,36 @@ import Precos    from './admin/Precos'
 import Pedidos   from './admin/Pedidos'
 
 const TELAS = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊', section: 'Visão geral' },
-  { id: 'pedidos',   label: 'Pedidos',   icon: '📋', section: 'Visão geral' },
-  { id: 'vendas',    label: 'Vendas',    icon: '💸', section: 'Operações' },
-  { id: 'compras',   label: 'Compras',   icon: '📦', section: 'Operações' },
-  { id: 'estoque',   label: 'Estoque',   icon: '🗃️', section: 'Gestão' },
-  { id: 'precos',    label: 'Preços',    icon: '💰', section: 'Gestão' },
+  { id: 'dashboard', label: 'Dashboard', icon: '📊', section: 'MÉTRICAS' },
+  { id: 'pedidos',   label: 'Gestão Pedidos', icon: '📋', section: 'MÉTRICAS' },
+  { id: 'vendas',    label: 'Nova Venda',    icon: '💸', section: 'OPERAÇÕES' },
+  { id: 'compras',   label: 'Entrada Estoque', icon: '📦', section: 'OPERAÇÕES' },
+  { id: 'estoque',   label: 'Inventário',    icon: '🗃️', section: 'GESTÃO' },
+  { id: 'precos',    label: 'Tabela Preços',    icon: '💰', section: 'GESTÃO' },
 ]
-const SECTIONS = ['Visão geral', 'Operações', 'Gestão']
+const SECTIONS = ['MÉTRICAS', 'OPERAÇÕES', 'GESTÃO']
 
-// ─── Notificação de novo pedido ────────────────────────────────────────────────
 function NotifModal({ pedido, onClose, onVerPedidos }) {
   if (!pedido) return null
   const itens = JSON.parse(pedido.itens || '[]')
   const cliente = `${pedido.cliente_nome || ''} ${pedido.cliente_sobrenome || ''}`.trim()
-  const waRaw = (pedido.cliente_whatsapp || '').replace(/\D/g, '')
-  const waNum = waRaw.startsWith('55') && waRaw.length >= 12 ? waRaw : '55' + waRaw
-  const msgWA = encodeURIComponent(
-    `🌊 Novo Pedido WavePod\nPedido: ${pedido.numero_pedido}\nCliente: ${cliente} (${pedido.cliente_whatsapp})\n` +
-    itens.map(i => `• ${i.nome}${i.sabor ? ' · ' + i.sabor : ''} x${i.qty}`).join('\n') +
-    `\nTotal: R$ ${fmt(pedido.total)} (${pedido.pagamento})`
-  )
+  const msgWA = encodeURIComponent(`🌊 Novo Pedido WavePod\nPedido: ${pedido.numero_pedido}\nTotal: R$ ${fmt(pedido.total)}`)
 
   return (
     <div className="notif-ov">
-      <div className="notif-box">
-        <div className="notif-header">
-          <span style={{ fontSize: 26 }}>🔔</span>
-          <div>
-            <div className="notif-title">Novo Pedido!</div>
-            <div style={{ fontSize: 11, color: 'var(--muted)' }}>WavePod · agora</div>
-          </div>
-        </div>
-        <div className="notif-body">
-          <strong>Pedido {pedido.numero_pedido}</strong><br />
-          👤 {cliente}
-          {waRaw && (
-            <> · <a href={`https://wa.me/${waNum}`} target="_blank" rel="noreferrer" style={{ color: 'var(--green)' }}>{pedido.cliente_whatsapp}</a></>
-          )}<br />
-          {itens.map((i, idx) => (
-            <span key={idx}>• {i.nome}{i.sabor ? ' · ' + i.sabor : ''} ×{i.qty}<br /></span>
-          ))}
-          💰 <strong>R$ {fmt(pedido.total)}</strong> · {pedido.pagamento}
-        </div>
-        <div className="notif-actions">
-          <button className="btn-primary" onClick={onVerPedidos} style={{ fontSize: 13, padding: '10px 18px' }}>Ver Pedidos</button>
-          <a href={`https://wa.me/${WA_DIEGO}?text=${msgWA}`} target="_blank" rel="noreferrer" className="btn-ghost" style={{ fontSize: 13, padding: '10px 18px', textDecoration: 'none' }}>📲 Diego</a>
-          <a href={`https://wa.me/${WA_LUCAS}?text=${msgWA}`} target="_blank" rel="noreferrer" className="btn-ghost" style={{ fontSize: 13, padding: '10px 18px', textDecoration: 'none' }}>📲 Lucas</a>
-          <button className="btn-ghost" onClick={onClose} style={{ fontSize: 13, padding: '10px 12px' }}>✕</button>
+      <div className="notif-box" style={{ background: 'var(--grad-metallic)', border: '1px solid var(--wp-yellow)' }}>
+        <div style={{ fontSize: 40, marginBottom: 20 }}>🔔</div>
+        <h2 style={{ fontSize: 28, fontWeight: 800, color: '#fff', marginBottom: 10 }}>Novo Pedido Detectado</h2>
+        <p style={{ color: 'var(--wp-silver)', marginBottom: 30 }}>Cliente: {cliente} · Total: R$ {fmt(pedido.total)}</p>
+        <div style={{ display: 'flex', gap: 15 }}>
+          <button className="btn-primary" onClick={onVerPedidos}>VER NO PAINEL</button>
+          <button className="btn-ghost" style={{ borderColor: '#fff', color: '#fff' }} onClick={onClose}>FECHAR</button>
         </div>
       </div>
     </div>
   )
 }
 
-// ─── Admin shell ───────────────────────────────────────────────────────────────
 export default function Admin() {
   const { currentUser } = useApp()
   const navigate = useNavigate()
@@ -77,27 +52,13 @@ export default function Admin() {
     document.documentElement.setAttribute('data-theme', 'light')
   }, [])
 
-  // Redireciona se não logado
   useEffect(() => {
     if (!currentUser) navigate('/login')
-  }, [currentUser]) // eslint-disable-line
+  }, [currentUser, navigate])
 
-  // Escuta notificações de novos pedidos
   useEffect(() => {
     const handler = (ev) => {
       setNotif(ev.detail)
-      // Som de notificação
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)()
-        ;[880, 1100].forEach((freq, i) => {
-          const osc = ctx.createOscillator(), gain = ctx.createGain()
-          osc.connect(gain); gain.connect(ctx.destination)
-          osc.frequency.value = freq
-          gain.gain.setValueAtTime(.25, ctx.currentTime + i * .18)
-          gain.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + i * .18 + .3)
-          osc.start(ctx.currentTime + i * .18); osc.stop(ctx.currentTime + i * .18 + .3)
-        })
-      } catch {}
     }
     window.addEventListener('wvpod:novopedido', handler)
     return () => window.removeEventListener('wvpod:novopedido', handler)
@@ -110,44 +71,70 @@ export default function Admin() {
     <>
       <Header showLogout />
 
-      {/* Mobile nav */}
-      <div className="admin-mobile-nav">
-        {TELAS.map(t => (
-          <button key={t.id}
-            className={tela === t.id ? 'active' : ''}
-            onClick={() => setTela(t.id)}>
-            {t.icon} {t.label}
-          </button>
-        ))}
-      </div>
-
       <div className="admin-layout">
-        {/* Sidebar desktop */}
-        <aside className="admin-sidebar">
+        {/* SIDEBAR REFINADA (CONFORME REFERÊNCIA) */}
+        <aside className="admin-sidebar" style={{ background: '#f5f5f5', borderRight: '1px solid #ddd' }}>
+          <div style={{ padding: '0 24px 30px' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '15px', background: '#fff', borderRadius: '12px', border: '1px solid #eee' }}>
+                <div className="logo-mark" style={{ width: 32, height: 32, fontSize: 12 }}>WP</div>
+                <div>
+                    <div style={{ fontSize: 12, fontWeight: 800 }}>WAVEPOD</div>
+                    <div style={{ fontSize: 10, color: '#999' }}>Painel Administrativo</div>
+                </div>
+             </div>
+          </div>
+
           {SECTIONS.map(section => (
-            <div key={section}>
-              <div className="sidebar-section">{section}</div>
+            <div key={section} style={{ marginBottom: 25 }}>
+              <div className="vsidebar-cat-title" style={{ padding: '0 24px', color: '#888' }}>{section}</div>
               {TELAS.filter(t => t.section === section).map(t => (
-                <button key={t.id}
-                  className={`sidebar-item${tela === t.id ? ' active' : ''}`}
+                <div key={t.id}
+                  className={`vsidebar-item${tela === t.id ? ' active-cat' : ''}`}
+                  style={{ 
+                    margin: '2px 16px', 
+                    borderRadius: '10px', 
+                    color: tela === t.id ? 'var(--wp-yellow)' : '#555',
+                    background: tela === t.id ? 'var(--wp-gray-dark)' : 'transparent'
+                  }}
                   onClick={() => setTela(t.id)}>
-                  <span className="sidebar-icon">{t.icon}</span>
-                  <span className="sidebar-label">{t.label}</span>
-                </button>
+                  <span>{t.icon}</span>
+                  <span style={{ fontWeight: 600 }}>{t.label}</span>
+                </div>
               ))}
             </div>
           ))}
+
+          <div style={{ marginTop: 'auto', padding: '24px', borderTop: '1px solid #eee' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--grad-metallic)', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: '#fff', fontWeight: 800 }}>{currentUser?.nome?.[0] || 'A'}</div>
+                <div>
+                    <div style={{ fontSize: 13, fontWeight: 700 }}>{currentUser?.nome || 'Admin'}</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>Sessão Ativa</div>
+                </div>
+             </div>
+          </div>
         </aside>
 
-        {/* Conteúdo */}
-        <div className="admin-content">
-          <div className="wrapper">
+        {/* CONTEÚDO COM HEADER DE BUSCA (ESTILO REF) */}
+        <main className="admin-content" style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: 0 }}>
+          <div style={{ height: 70, background: '#fff', borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', padding: '0 40px', justifyContent: 'space-between' }}>
+             <div style={{ background: '#f0f0f0', padding: '10px 20px', borderRadius: '10px', width: 400, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ opacity: 0.4 }}>🔍</span>
+                <input type="text" placeholder="Buscar pedidos, clientes ou produtos..." style={{ border: 'none', background: 'transparent', padding: 0, fontSize: 13 }} />
+             </div>
+             <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+                <span style={{ fontSize: 20, cursor: 'pointer', opacity: 0.6 }}>❓</span>
+                <span style={{ fontSize: 20, cursor: 'pointer', opacity: 0.6 }}>🔔</span>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#000', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800 }}>WP</div>
+             </div>
+          </div>
+          
+          <div style={{ padding: 40, flex: 1, overflowY: 'auto' }}>
             <Componente />
           </div>
-        </div>
+        </main>
       </div>
 
-      {/* Notificação */}
       <NotifModal
         pedido={notif}
         onClose={() => setNotif(null)}

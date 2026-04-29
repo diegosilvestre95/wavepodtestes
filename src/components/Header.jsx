@@ -12,23 +12,20 @@ export default function Header({ showAdminBtn = false, showLogout = false }) {
 
   return (
     <header className="site-header">
-      <span className="logo">
-        <span className="logo-mark">WP</span>
-        <span className="logo-text">WAVEPOD</span>
-      </span>
+      <Link to="/" className="logo">
+        <div className="logo-mark">WP</div>
+        <div className="logo-text">WAVEPOD</div>
+      </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {showLogout && currentUser && (
-          <>
-            <span className="role-badge">{currentUser.nome}</span>
-            <span className="rt-dot" title="Sincronização ativa" />
-            <button className="btn-logout" onClick={handleLogout}>Sair</button>
-          </>
+      <div style={{ display: 'flex', gap: '12px' }}>
+        {showAdminBtn && (
+          <button onClick={() => navigate('/admin')} className="btn-ghost" style={{ padding: '8px 16px', fontSize: 12 }}>
+            👑 Admin
+          </button>
         )}
-        {showAdminBtn && !currentUser && (
-          <button className="btn-ghost" style={{ fontSize: 12, padding: '7px 13px' }}
-            onClick={() => navigate('/login')}>
-            🔐 Admin
+        {showLogout && (
+          <button onClick={handleLogout} className="btn-ghost" style={{ padding: '8px 16px', fontSize: 12 }}>
+            Sair
           </button>
         )}
       </div>
